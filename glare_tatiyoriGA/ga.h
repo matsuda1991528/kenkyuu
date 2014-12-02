@@ -143,7 +143,7 @@ void valuation(){
 	
 	for(i=0;i<INDI_NUM;i++){
 		currentTime = individual[i].waitTime;  //移動時間の初期値は待ち時間
-		sumUncom[i] = individual[i].waitTime;       //初期値は待ち時間に起因する不快度
+		individual[i].uncomValue = individual[i].waitTime;       //初期値は待ち時間に起因する不快度
 		for(j=1;j<GENE_SIZE-1;j++){
 			partOfRoute = serch_route(individual[i].gene[j], individual[i].gene[j+1], currentTime);
 			currentTime += partOfRoute.time;

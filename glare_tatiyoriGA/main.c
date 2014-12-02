@@ -8,26 +8,26 @@ int main(void){
 	eliteIndividual.uncomValue = INF;
 	
 	getMapData();
-	printf("aftergetMap\n");
+	//printf("aftergetMap\n");
 	getGene();
-	printf("afterGetGene\n");
+	//printf("afterGetGene\n");
 	printGene();
 	valuation();
-	printf("afterGetValuation\n");
+	//printf("afterGetValuation\n");
 	printGene();
 	eliteSave();
 	for(cnt=0;cnt<GENERATION;cnt++){
 		selection();
-		printf("afterselection\n");
+		//printf("afterselection\n");
 		insertElite();
 		crossover();
-		printf("aftercrossover\n");
+		//printf("aftercrossover\n");
 		mutation();
-		printf("aftermutation\n");
+		//printf("aftermutation\n");
 		waitTimeMutation();
-		printf("afterwaitTimeMutation\n");
+		//printf("afterwaitTimeMutation\n");
 		valuation();
-		printf("aftervaluation\n");
+		//printf("aftervaluation\n");
 		eliteSave();
 	}
 	printElite();
