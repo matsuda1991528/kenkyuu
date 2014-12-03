@@ -1,0 +1,5 @@
+start 1
+drop1 7
+drop2 21
+drop3 35
+goal  41
