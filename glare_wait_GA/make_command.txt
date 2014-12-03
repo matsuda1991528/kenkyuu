@@ -1,0 +1,3 @@
+gcc -c main.c getMapData.c getSunAngle.c -lm
+gcc -o go main.o getMapData.o getSunAngle.o
+./go.exe
