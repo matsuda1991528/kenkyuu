@@ -1,0 +1,3 @@
+gcc -c main.c getGene.c getMapData.c getSunAngle.c serch_route.c -lm
+gcc -o go main.o getGene.o getMapData.o getSunAngle.o serch_route.o
+./go.exe
