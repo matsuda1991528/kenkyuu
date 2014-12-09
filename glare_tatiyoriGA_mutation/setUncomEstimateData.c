@@ -2,21 +2,29 @@
 #define SetEstimateData_C
 #include<stdio.h>
 #include<stdlib.h>
+#include<math.h>
 #include"extern.h"
+//#include"glare.h"
 
-void setUncomEstimateData(dropPointData dropPoint[GENE_SIZE]){
+double getDistance(struct xy_data, struct xy_data);
+double getAngle(struct xy_data, struct xy_data);
+
+void setUncomEstimateData(){
 	struct node_data dropPointData[GENE_SIZE];
 	double timeEstimateMatrix[GENE_SIZE][GENE_SIZE];
 	double angleEstimateMatrix[GENE_SIZE][GENE_SIZE];
-	double uncomEstimateMatrix[24][GENE_SIZE][GENE_SIZE];
+	//double uncomEstimateMatrix[48][GENE_SIZE][GENE_SIZE];
 	double estimateDistance;
 	double estimateRadian;
 	double time;
-	int i, j;
+	int cnt, i, j;
 	
 	//drop point node number is entered into dropPointData[i] 
 	for(i=1;i<GENE_SIZE;i++){
 		dropPointData[i].num = dropPoint[i].num;
+	}
+	for(i=1;i<GENE_SIZE;i++){
+		printf("dropPoint[%d].num = %d\n", i, dropPoint[i].num);
 	}
 	//enter coord of node corresponds to node number
 	for(i=1;i<GENE_SIZE;i++){
@@ -28,18 +36,26 @@ void setUncomEstimateData(dropPointData dropPoint[GENE_SIZE]){
 		}
 	}
 	
+	
 	//calclation of each drop point's move time 
 	for(i=1;i<GENE_SIZE;i++){
 		for(j=1;j<GENE_SIZE;j++){
-			if(node[dropPointData[i].num].num == node[dropPointData[j]].num){
+			if(node[dropPointData[i].num].num == node[dropPointData[j].num].num){
 				timeEstimateMatrix[i][j] = INF;
 			}
 			else{
 				estimateDistance = getDistance(node[dropPointData[i].num].pos, node[dropPointData[j].num].pos);
-				timeEstimateMatrix[i][j] = estimateDistance / MOVE_SPEED;
+				timeEstimateMatrix[i][j] = estimateDistance / MOVE_SPEED * 60;
 			}
 		}
 	}
+	for(i=1;i<GENE_SIZE;i++){
+		for(j=1;j<GENE_SIZE;j++){
+			printf("%7.2f", timeEstimateMatrix[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
 	//calculation of each drop point's angle
 	for(i=1;i<GENE_SIZE;i++){
 		for(j=1;j<GENE_SIZE;j++){
@@ -51,37 +67,53 @@ void setUncomEstimateData(dropPointData dropPoint[GENE_SIZE]){
 			}
 		}
 	}
+
+	for(i=1;i<GENE_SIZE;i++){
+		for(j=1;j<GENE_SIZE;j++){
+			printf("%7.2f", angleEstimateMatrix[i][j]);
+		}
+		printf("\n");
+	}
 	
-	for(time=1;time<24;time++){
+	time = 1;
+	for(cnt=1;cnt<DATA_BASE_SIZE;cnt++){
+		estimateUncom[cnt].time = time;
 		getSunAngle(time);
+		//printf("elevation = %f, azimuth = %f\n", elevation, azimuth);
 		for(i=1;i<GENE_SIZE;i++){
 			for(j=1;j<GENE_SIZE;j++){
 				if(node[dropPointData[i].num].num == node[dropPointData[j].num].num){
-					uncomEstimateMatrix[time][i][j] = INF;
+					estimateUncom[cnt].matrix[i][j] = INF;
 				}
 				else{
-					uncomEstimateMatrix[time][i][j] = getUncom(dropPointData[i].num, dropPointData[j].num, elevation, azimuth);
+					if(elevation<=25 && elevation>=0 && fabs(azimuth-angleEstimateMatrix[i][j])<50.0){ 
+						estimateUncom[cnt].matrix[i][j] = getUncomEstimate(dropPointData[i].num, dropPointData[j].num, timeEstimateMatrix[i][j], angleEstimateMatrix[i][j]);
+					}
+					else{
+						estimateUncom[cnt].matrix[i][j] = timeEstimateMatrix[i][j];
+					}
 				}
 			}
 		}
+		time += 0.5;
 	}
-	
-	for(time=1;time<24;time++){
-		printf("time = %d\n", time);
+/*	
+	for(cnt=1;cnt<DATA_BASE_SIZE;cnt++){
+		printf("time = %f\n", estimateUncom[cnt].time);
 		printf("     ");
 		for(i=1;i<GENE_SIZE;i++){
-			printf("%5d", dropPointData[i].num);
+			printf("%8d", dropPointData[i].num);
 		}
 		printf("\n");
 		for(i=1;i<GENE_SIZE;i++){
 			printf("%5d", dropPointData[i].num);
 			for(j=1;j<GENE_SIZE;j++){
-				printf("%5d", uncomEstimateMatrix[time][i][j]);
+				printf("%8.1f", estimateUncom[cnt].matrix[i][j]);
 			}
 			printf("\n");
 		}
 	}
-			
+*/			
 			
 }
 
@@ -104,3 +136,24 @@ double getAngle(struct xy_data currentPos, struct xy_data nextPos){
 	angle = radian * 180.0 / M_PI;
 	return angle;
 }
+
+double getUncomEstimate(int p1, int p2, double moveTimeEstimate, double edgeAngleEstimate){
+	double illuminance; // ‘¾—z–@üÆ“x
+	double angle;
+	double equivalent_velling_luminance;
+	double disability_glare;
+	double path_eye_degree; //Ž‹ü‚Æ‘¾—z•ûˆÊ‚Ì‚È‚·Šp(2ŽŸŒ³)
+	double degree = 0.0f;
+	double radian = 0.0f;
+	double time = 0.0f;
+	double uncom = 0.0f;
+	
+	path_eye_degree = azimuth - edgeAngleEstimate;
+	illuminance = getIlluminance(elevation, path_eye_degree);
+	angle = get3D_angle(elevation, path_eye_degree);
+	equivalent_velling_luminance = getEquivalent_velling_luminance(angle, illuminance);
+	disability_glare = getDisability_glare(equivalent_velling_luminance);
+//	printf("%f * %f\n", disability_glare, matrix[p1][p2].necessary_time);
+	return (1 + disability_glare) * moveTimeEstimate;
+}
+#endif

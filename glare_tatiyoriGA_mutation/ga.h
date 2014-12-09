@@ -140,6 +140,7 @@ void valuation(){
 		individual[i].uncomValue = individual[i].waitTime;       //初期値は待ち時間に起因する不快度
 		for(j=1;j<GENE_SIZE-1;j++){
 			partOfRoute = serch_route(individual[i].gene[j], individual[i].gene[j+1], currentTime);
+			//printf("b\n");
 			currentTime += partOfRoute.time;
 			//printf("%f\n", partOfRoute.uncom);
 			individual[i].uncomValue += partOfRoute.uncom;
@@ -163,17 +164,17 @@ void printElite(){
 	int i, j;
 	int travelPointNum = 1;  //通過地点数
 	int currentTime;
-	int eliteRoute[2*nodeNum];  //移動経路を格納する配列
+	int eliteRoute[2*NODE_NUM];  //移動経路を格納する配列
 	struct routeData elitePartOfRoute;
 	
 	/* 初期化 */
-	for(i=1;i<2*nodeNum;i++){
+	for(i=1;i<2*NODE_NUM;i++){
 		eliteRoute[i] = 0;
 	}
 	currentTime = eliteIndividual.waitTime;
 	for(i=1;i<GENE_SIZE-1;i++){
 		elitePartOfRoute = serch_route(eliteIndividual.gene[i], eliteIndividual.gene[i+1], currentTime);
-		for(j=1;j<nodeNum;j++){
+		for(j=1;j<NODE_NUM;j++){
 			if(elitePartOfRoute.route[j] != 0){
 				eliteRoute[travelPointNum] = elitePartOfRoute.route[j];
 				travelPointNum++;
@@ -199,7 +200,7 @@ void printElite(){
 	}
 	printf("\n");
 	/* 経路の表示 */
-	for(i=1;i<2*nodeNum;i++){
+	for(i=1;i<2*NODE_NUM;i++){
 		if(eliteRoute[i] != 0)
 			printf("%d->", eliteRoute[i]);
 	}

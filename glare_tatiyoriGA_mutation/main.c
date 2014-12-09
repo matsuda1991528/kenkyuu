@@ -13,6 +13,7 @@ int main(void){
 	//printf("afterGetGene\n");
 	//printGene();
 	setUncomEstimateData();
+	//printf("aftersetUncomEstimate\n");
 	valuation();
 	//printf("afterGetValuation\n");
 	//printGene();
@@ -26,10 +27,11 @@ int main(void){
 		insertElite();
 		//printf("beforecrossover\n");
 		//printGene();
-		crossover();
+		//crossover();
 		//printf("aftercrossover\n");
 		//printGene();
-		mutation();
+		//mutation();
+		specificWesteringSunMutation();
 		//printf("aftermutation\n");
 		waitTimeMutation();
 		//printf("afterwaitTimeMutation\n");

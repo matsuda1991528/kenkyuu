@@ -25,25 +25,25 @@ void getMapData(){
 		fscanf(fp1, "%s", characterDummy);
 		fscanf(fp1, "%d", &integerDummy);
 		fscanf(fp1, "%s %s %s", characterDummy, characterDummy, characterDummy);
-		for(i=1;i<nodeNum;i++){
+		for(i=1;i<NODE_NUM;i++){
 			fscanf(fp1,"%d",&node[i].num);
 			fscanf(fp1,"%d",&node[i].pos.x);
 			fscanf(fp1,"%d",&node[i].pos.y);
 		}
 	}
 	fclose(fp1);
-//	for(i=1;i<nodeNum;i++)
+//	for(i=1;i<NODE_NUM;i++)
 //		printf("%d,%d\n",cord[i].x, cord[i].y);
 	
 	fp2 = fopen(fname2, "r");
 	if(fp2 == NULL)
 		printf("file2 open error\n");
 	else{
-		for(i=1;i<nodeNum;i++)
+		for(i=1;i<NODE_NUM;i++)
 			fscanf(fp2,"%d",&integerDummy);
-		for(i=1;i<nodeNum;i++){
+		for(i=1;i<NODE_NUM;i++){
 			fscanf(fp2,"%d",&integerDummy);
-			for(j=1;j<nodeNum;j++)
+			for(j=1;j<NODE_NUM;j++)
 				fscanf(fp2,"%lf",&matrix[i][j].distance);
 		}
 	}
@@ -53,19 +53,19 @@ void getMapData(){
 	if(fp3 == NULL)
 		printf("file3 open error\n");
 	else{
-		for(i=1;i<nodeNum;i++)
+		for(i=1;i<NODE_NUM;i++)
 			fscanf(fp3, "%d", &integerDummy);
-		for(i=1;i<nodeNum;i++){
+		for(i=1;i<NODE_NUM;i++){
 			fscanf(fp3, "%d", &integerDummy);
-			for(j=1;j<nodeNum;j++)
+			for(j=1;j<NODE_NUM;j++)
 				fscanf(fp3, "%lf", &matrix[i][j].angle);
 		}
 	}
 	fclose(fp3);
 
 	/* Š—vŽžŠÔs—ñ‚ÌŽæ“¾ */
-	for(i=1;i<nodeNum;i++){
-		for(j=1;j<nodeNum;j++){
+	for(i=1;i<NODE_NUM;i++){
+		for(j=1;j<NODE_NUM;j++){
 			if(matrix[i][j].distance != INF){
 				matrix[i][j].time = matrix[i][j].distance / MOVE_SPEED * 60;
 			}

@@ -3,7 +3,7 @@
 
 /* map data */
 #define NODE_NUM 42
-#define INF 999
+#define INF 9999
 #define START 1    //スタート地点番号
 #define GOAL 41      //ゴール地点番号
 #define START_HOUR 19 //スタート時刻（時）
@@ -11,15 +11,17 @@
 #define MOVE_SPEED 60 //(km/h)
 #define MAX_WAITTIME 200
 
+#define DATA_BASE_SIZE 48  //estimateUncom 30min cicle -> 24*2 -> 48
+
 /*  */
 
 /* GA data */
-#define GENERATION 100  //世代数
-#define INDI_NUM  50//個体数
+#define GENERATION 1  //世代数
+#define INDI_NUM  5//個体数
 #define GENE_SIZE 6  //遺伝子長（立ちより地＋start+goal）
 
 #define CROSSOVER_RATE 0.9
-#define MUTATION_RATE 0.01
+#define MUTATION_RATE 0.1
 #define WAITTIMEMUTATION_RATE 0.01
 
 struct xy_data{
@@ -58,13 +60,17 @@ typedef struct{
 	int flag;
 	int num;
 }dropPointData;
+struct estimateData{
+	double time;
+	double matrix[GENE_SIZE][GENE_SIZE];
+};
 struct xy_data cord[NODE_NUM];
 struct node_data node[NODE_NUM];
 struct matrix_data matrix[NODE_NUM][NODE_NUM];
 struct sun_data sun;
 struct individualData individual[INDI_NUM];
 struct individualData eliteIndividual;
-int nodeNum;
+struct estimateData estimateUncom[DATA_BASE_SIZE]; 
 double elevation;
 double azimuth;
 int v_node[NODE_NUM];
@@ -72,6 +78,8 @@ int route[NODE_NUM];
 dropPointData dropPoint[GENE_SIZE];
 
 struct routeData serch_route(int, int, double);
+double getUncomEstimate(int, int, double, double);
+double getUncom(int, int, double, double);
 void sunAngle(double); //太陽高度・方位算出
 double getIlluminance(double, double); //太陽の法線照度算出
 double get3D_angle(double, double); //視線軸と光源軸のなす角算出

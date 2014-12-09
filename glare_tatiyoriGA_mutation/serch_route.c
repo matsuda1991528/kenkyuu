@@ -4,7 +4,7 @@
 #include<stdlib.h>
 #include<math.h>
 #include"extern.h"
-#include"glare.h"
+//#include"glare.h"
 
 struct routeData serch_route(int start, int goal, double temp_time){
 	int i, j, k, p;
@@ -35,7 +35,6 @@ struct routeData serch_route(int start, int goal, double temp_time){
 		st_hour += temp_hour;
 	}
 	
-	
 /* 初期化：スタートノードの距離を0，他のノードを未定義（INF）に設定*/
 	for(i=1;i<NODE_NUM;i++){
 		uncom[i] = INF;
@@ -63,12 +62,11 @@ struct routeData serch_route(int start, int goal, double temp_time){
 			printf("%d, %d\n",start, goal);
 			exit(1);
 		}
-		
 		/* p(確定ノード)から伸びている辺の距離をそれぞれチェックし，
 		それまでの距離最小経路より小さければ更新　*/
 		
 		/* uncom[p] + matrix_d[p][j] : uncom[p]と各隣接ノードの距離の和 */
-		for(j=1;j<nodeNum;j++){
+		for(j=1;j<NODE_NUM;j++){
 		/* p(確定ノード)から伸びている辺の移動時間をそれぞれチェックし，
 		各々の時間での太陽高度と太陽方位のデータを取得*/
 			if(matrix[p][j].time != INF){

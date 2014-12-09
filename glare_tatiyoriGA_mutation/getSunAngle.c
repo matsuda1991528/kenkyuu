@@ -20,7 +20,7 @@ void getSunAngle(double time){
 	elevation = 0.0f;
 	azimuth = 0.0f;
 	fact = M_PI / 180; //度数法の角度　×　fact = 弧度法（ラジアン変換）
-	year = 2012;
+	year = 2014;
 	month = 6;
 	day = 21;
 	
