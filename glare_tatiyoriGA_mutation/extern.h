@@ -21,7 +21,7 @@
 #define GENE_SIZE 6  //遺伝子長（立ちより地＋start+goal）
 
 #define CROSSOVER_RATE 0.9
-#define MUTATION_RATE 0.1
+#define MUTATION_RATE 0.5
 #define WAITTIMEMUTATION_RATE 0.01
 
 struct xy_data{
