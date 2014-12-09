@@ -23,9 +23,9 @@ void setUncomEstimateData(){
 	for(i=1;i<GENE_SIZE;i++){
 		dropPointData[i].num = dropPoint[i].num;
 	}
-	for(i=1;i<GENE_SIZE;i++){
-		printf("dropPoint[%d].num = %d\n", i, dropPoint[i].num);
-	}
+	//for(i=1;i<GENE_SIZE;i++){
+	//	printf("dropPoint[%d].num = %d\n", i, dropPoint[i].num);
+	//}
 	//enter coord of node corresponds to node number
 	for(i=1;i<GENE_SIZE;i++){
 		for(j=1;j<NODE_NUM;j++){
@@ -49,6 +49,7 @@ void setUncomEstimateData(){
 			}
 		}
 	}
+	/*
 	for(i=1;i<GENE_SIZE;i++){
 		for(j=1;j<GENE_SIZE;j++){
 			printf("%7.2f", timeEstimateMatrix[i][j]);
@@ -56,6 +57,7 @@ void setUncomEstimateData(){
 		printf("\n");
 	}
 	printf("\n");
+	*/
 	//calculation of each drop point's angle
 	for(i=1;i<GENE_SIZE;i++){
 		for(j=1;j<GENE_SIZE;j++){
@@ -67,14 +69,14 @@ void setUncomEstimateData(){
 			}
 		}
 	}
-
+/*
 	for(i=1;i<GENE_SIZE;i++){
 		for(j=1;j<GENE_SIZE;j++){
 			printf("%7.2f", angleEstimateMatrix[i][j]);
 		}
 		printf("\n");
 	}
-	
+*/	
 	time = 1;
 	for(cnt=1;cnt<DATA_BASE_SIZE;cnt++){
 		estimateUncom[cnt].time = time;

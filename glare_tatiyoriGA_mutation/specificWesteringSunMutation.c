@@ -32,11 +32,11 @@ void specificWesteringSunMutation(){
 		for(j=1;j<GENE_SIZE-2;j++){
 			mutation_ran = random()%1000+1;
 			if(mutation_ran <= mutation_rate){
-				printf("\n");
-				for(k=1;k<GENE_SIZE;k++){	
-					printf("|%d|", individual[i].gene[k]);
-				}
-				printf("\n");
+				//printf("\n");
+				//for(k=1;k<GENE_SIZE;k++){	
+				//	printf("|%d|", individual[i].gene[k]);
+				//}
+				//printf("\n");
 				//printf("mutate point -> %d\n", individual[i].gene[j]);
 				//calculate the time when passing mutate point
 				moveMin = individual[i].waitTime;
@@ -135,14 +135,14 @@ void specificWesteringSunMutation(){
 					}
 				}
 				//printf("after mutation\n");
-				for(k=1;k<GENE_SIZE;k++){
-					printf("|%d|", individual[i].gene[k]);
-				}
-				printf("\n");
+				//for(k=1;k<GENE_SIZE;k++){
+				//	printf("|%d|", individual[i].gene[k]);
+				//}
+				//printf("\n");
 			}
 		}
 	}
-	printf("\n\n");
+	//printf("\n\n");
 }
 
 double getMutateRatio(double uncom, double sumUncom){

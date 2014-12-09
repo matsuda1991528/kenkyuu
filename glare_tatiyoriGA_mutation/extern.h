@@ -6,7 +6,7 @@
 #define INF 9999
 #define START 1    //スタート地点番号
 #define GOAL 41      //ゴール地点番号
-#define START_HOUR 19 //スタート時刻（時）
+#define START_HOUR 16 //スタート時刻（時）
 #define START_MIN 0   //スタート時刻（分)
 #define MOVE_SPEED 60 //(km/h)
 #define MAX_WAITTIME 200
@@ -16,13 +16,13 @@
 /*  */
 
 /* GA data */
-#define GENERATION 1  //世代数
-#define INDI_NUM  5//個体数
-#define GENE_SIZE 6  //遺伝子長（立ちより地＋start+goal）
+#define GENERATION 100 //世代数
+#define INDI_NUM  10//個体数
+#define GENE_SIZE 13  //遺伝子長（立ちより地＋start+goal）
 
-#define CROSSOVER_RATE 0.9
-#define MUTATION_RATE 0.5
-#define WAITTIMEMUTATION_RATE 0.01
+#define CROSSOVER_RATE 0.6
+#define MUTATION_RATE 0.01
+#define WAITTIMEMUTATION_RATE 0.1
 
 struct xy_data{
 	int x;

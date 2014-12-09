@@ -27,11 +27,13 @@ int main(void){
 		insertElite();
 		//printf("beforecrossover\n");
 		//printGene();
-		//crossover();
+		crossover();
 		//printf("aftercrossover\n");
 		//printGene();
-		//mutation();
-		specificWesteringSunMutation();
+		//printf("aftercrossover\n");
+		//printGene();
+		mutation();
+		//specificWesteringSunMutation();
 		//printf("aftermutation\n");
 		waitTimeMutation();
 		//printf("afterwaitTimeMutation\n");

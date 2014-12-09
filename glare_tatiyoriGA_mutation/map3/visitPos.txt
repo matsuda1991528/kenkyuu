@@ -1,5 +1,13 @@
 start 1
-drop1 7
-drop2 21
-drop3 35
+drop1 2
+drop2 4
+drop3 7
+drop4 12
+drop5 14
+drop6 21
+drop7 28
+drop8 30
+drop9 35
+drop10 38
+drop11 40
 goal  41
