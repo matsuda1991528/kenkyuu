@@ -4,6 +4,13 @@
 
 
 int main(void){
+	FILE *fp;
+	char *fname = "resultOfExperiment/specificWesteringSunlMutation.csv";
+	fp = fopen(fname, "w");
+	if(fp == NULL){
+		printf("%s open error\n", fname);
+		exit(1);
+	}
 	int cnt;
 	eliteIndividual.uncomValue = INF;
 	
@@ -32,8 +39,8 @@ int main(void){
 		//printGene();
 		//printf("aftercrossover\n");
 		//printGene();
-		mutation();
-		//specificWesteringSunMutation();
+		//mutation();
+		specificWesteringSunMutation();
 		//printf("aftermutation\n");
 		waitTimeMutation();
 		//printf("afterwaitTimeMutation\n");
@@ -41,7 +48,9 @@ int main(void){
 		//printf("aftervaluation\n");
 		//printGene();
 		eliteSave();
+		fprintf(fp, "%d, %f\n", cnt, eliteIndividual.uncomValue);
 	}
+	fclose(fp);
 	printElite();
 	
 	return 0;
