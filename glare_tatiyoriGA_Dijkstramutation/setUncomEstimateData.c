@@ -41,7 +41,12 @@ void setUncomEstimateData(){
 		estimateUncom[cnt].time = time;
 		for(i=1;i<GENE_SIZE;i++){
 			for(j=1;j<GENE_SIZE;j++){
-				estimateUncom[cnt].matrix[i][j] = getDijkstraUncom(dropPointData[i].num, dropPointData[j].num, estimateUncom[cnt].time);
+				if(dropPointData[i].num == dropPointData[j].num){
+					estimateUncom[cnt].matrix[i][j] = FALSE;
+				}
+				else{
+					estimateUncom[cnt].matrix[i][j] = getDijkstraUncom(dropPointData[i].num, dropPointData[j].num, estimateUncom[cnt].time);
+				}
 			}
 		}
 		time += 0.5;

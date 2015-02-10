@@ -10,13 +10,14 @@
 #define START_MIN 0   //スタート時刻（分)
 #define MOVE_SPEED 60 //(km/h)
 #define MAX_WAITTIME 200
+#define FALSE -1
 
 #define DATA_BASE_SIZE 48  //estimateUncom 30min cicle -> 24*2 -> 48
 
 /*  */
 
 /* GA data */
-#define GENERATION 1000 //世代数
+#define GENERATION 100  //世代数
 #define INDI_NUM  5//個体数
 #define GENE_SIZE 42  //遺伝子長（立ちより地＋start+goal+1）
 

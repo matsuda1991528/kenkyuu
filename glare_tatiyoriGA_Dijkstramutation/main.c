@@ -67,6 +67,7 @@ int main(int argc, char **argv){
 
 	while(1){
 		cnt++;
+		//printf("cnt = %d\n", cnt);
 		selection();
 		//printGene();
 		insertElite();
@@ -84,7 +85,7 @@ int main(int argc, char **argv){
 		eliteSave();
 		//fprintf(fp, "%f,", eliteIndividual.uncomValue);
 
-		printf("%f,", eliteIndividual.uncomValue);
+		//printf("%f,", eliteIndividual.uncomValue);
 		if(cnt > GENERATION)
 			break;
 	}

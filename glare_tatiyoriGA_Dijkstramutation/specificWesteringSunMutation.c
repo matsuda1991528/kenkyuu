@@ -62,6 +62,7 @@ void specificWesteringSunMutation(){
 								break;
 							}
 						}
+						//参照遺伝子から各立ち寄り地への推定値が格納されたデータをslect
 						for(l=1;l<GENE_SIZE;l++){
 							estimateUncomArray[l].uncom = estimateUncom[k-1].matrix[m][l];
 							estimateUncomArray[l].node = dropPoint[l].num;
@@ -89,36 +90,48 @@ void specificWesteringSunMutation(){
 				sumEstimateUncom = 0.0f;
 				avgEstimateUncom = 0.0f;
 				for(k=2;k<GENE_SIZE-1;k++){
-					sumEstimateUncom += 1 / estimateUncomArray[k].uncom;
+					//printf("estUncomArray[%d] = %f\n", k, estimateUncomArray[k].uncom);
+					if(estimateUncomArray[k].uncom != FALSE){
+						sumEstimateUncom += 1 / estimateUncomArray[k].uncom;
+						//printf("sumEst:%f += %f\n\n",sumEstimateUncom,  1/estimateUncomArray[k].uncom);
+					}
 				}
+				
 				avgEstimateUncom = sumEstimateUncom / (GENE_SIZE - 4);
-				////printf("avg = %f\n", avgEstimateUncom);
-				////printf("sum = %f\n", sumEstimateUncom);
-				//偏差の計算
+				//printf("%f = %f / %d\n", avgEstimateUncom, sumEstimateUncom, GENE_SIZE-4);
+
+			////////////////////////////////////////////////////////////	///
+            ///* 各立ち寄り地間の推定不快度の標準偏差を求める *///
+			//////////////////////////////////////////////////////////////
 				for(k=1;k<GENE_SIZE;k++){
 					estimateUncomArray[k].dev = 0.0f;
 				}
 				for(k=2;k<GENE_SIZE-1;k++){
-					if(estimateUncomArray[k].uncom != INF){
+					if(estimateUncomArray[k].uncom != FALSE){
 						estimateUncomArray[k].dev = estimateUncomParameter * (1 / estimateUncomArray[k].uncom - avgEstimateUncom);
+						//printf("%f = %f * (1 / %f - %f)\n", estimateUncomArray[k].dev, estimateUncomParameter, estimateUncomArray[k].uncom, avgEstimateUncom);
 					}
 				}
 
 						
 				////printf("sumEstimateUncom = %f\n", sumEstimateUncom);
 				//for(k=2;k<GENE_SIZE-1;k++){
-				//	if(estimateUncomArray[k].uncom != INF){
+				//	if(estimateUncomArray[k].uncom != FALSE){
 				//		estimateUncomArray[k].ratio = getMutateRatio(estimateUncomArray[k].uncom, sumEstimateUncom);
 				//		//printf("%f, ",estimateUncomArray[k].ratio);
 				//	}
 				//}
 				//printf("\n");
+				
+			////////////////////////////////////////////////////////////	///
+            ///       * /各立ち寄り地間の変異比率を求める          *///
+			//////////////////////////////////////////////////////////////
 				for(k=2;k<GENE_SIZE-1;k++){
-					if(estimateUncomArray[k].uncom != INF)
+					if(estimateUncomArray[k].uncom != FALSE)
 						estimateUncomArray[k].ratio = 100.0f / (GENE_SIZE - 4);
 				}
 				for(k=2;k<GENE_SIZE-1;k++){
-					if(estimateUncomArray[k].uncom != INF){
+					if(estimateUncomArray[k].uncom != FALSE){
 						devRatio = getDevRatio(estimateUncomArray[k].dev, sumEstimateUncom);
 						estimateUncomArray[k].ratio += devRatio;
 					}
@@ -128,7 +141,7 @@ void specificWesteringSunMutation(){
 				//		estimateUncomArray[k].ratio = 1;
 				//	}
 				//}
-/*			
+/*
 				for(k=1;k<GENE_SIZE;k++){
 					printf("|%7d|", estimateUncomArray[k].node);
 				}
