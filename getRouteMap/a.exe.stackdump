@@ -1,0 +1,9 @@
+Exception: STATUS_STACK_OVERFLOW at eip=00401F7F
+eax=00CF61B8 ebx=00E1CC9C ecx=00422C58 edx=00000000 esi=612D2B7C edi=00E1CD84
+ebp=00E1CC68 esp=00E1CC4C program=C:\cygwin\home\sosmem\matsuda\kenkyuu\getRouteMap\a.exe, pid 5744, thread main
+cs=001B ds=0023 es=0023 fs=003B gs=0000 ss=0023
+Stack trace:
+Frame     Function  Args
+00E1CC68  00401F7F (612D2B7C, 00E1CD84, 00E1CD28, 6100842E)
+00E1CD28  6100842E (00000000, 00E1CD84, 61007530, 00000000)
+End of stack trace
