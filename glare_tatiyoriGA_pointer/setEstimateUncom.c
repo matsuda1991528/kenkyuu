@@ -49,7 +49,7 @@ static double getDijkstraUncom(int start, int goal, struct map_data_t map_data, 
 			if(map_data.matrix_trav_time[p][j] != INF){
 				arrival_time = ((time[p] + map_data.matrix_trav_time[p][j]) / 60.0) + departure_time;
 				sun_angle = getSunAngle(arrival_time);
-				if(sun_angle.elevation <= SUN_HIGH && sun_angle.elevation >= SUN_LOW && fabs(sun_angle.azimuth - map_data.matrix_trav_time[p][j]) < SUN_WIDTH){
+				if(sun_angle.elevation <= SUN_HIGH && sun_angle.elevation >= SUN_LOW && fabs(sun_angle.azimuth - matrix_angle[p][j]) < SUN_WIDTH){
 					tmp_uncom = getGlare(p, j, sun_angle) * map_data.matrix_trav_time[p][j];
 					if(uncom[p] + tmp_uncom < uncom[j]){
 						uncom[j] = uncom[p] + tmp_uncom;

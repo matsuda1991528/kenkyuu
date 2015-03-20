@@ -75,6 +75,7 @@ double **matrix_angle;
 double crossover_rate, mutation_rate, wait_time_mutation_rate;
 double estimate_uncom_parameter;
 double inverse_parameter;
+int start_hour;
 int seed;
 
 void print_gene(struct ga_population_t);

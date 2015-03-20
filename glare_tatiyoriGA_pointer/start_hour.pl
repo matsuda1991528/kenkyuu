@@ -11,7 +11,7 @@ my $result;      #output of GA program's data which is  supposed final update ge
 my $sum_result;  #sum total of result(this variable is used to calculate average of result)
 my $avg_result;  #average of result
 my $estimateUncomParameter;
-my $tuningUncomParameter;
+#my $start_hour;
 
 my $sec;
 my $min;
@@ -21,7 +21,7 @@ my $mon;
 my $year;
 my $wno;
 
-my @inverse=(0, -0.2, -0.5, -1, -2, -5, -10);  #突然変異率を格納した配列
+my @st_hour=(13, 15, 17, 19, 21);  #突然変異率を格納した配列
 my @strlist;   #ファイルの中身（最終更新世代数or適応度）
 
 print "start\n";
@@ -46,9 +46,9 @@ print "$year/$mon/$mday ($wdays[$wno]) $hour:$min:$sec\n";
 #}
 
 
-foreach my $inverse(@inverse){	
+foreach my $start_hour(@st_hour){	
 	for($seed=0;$seed<$ind;$seed++){
-		$result=system("./go -seed $seed -inverse $inverse -start_hour 17 >> convergenceData/inverseParameter_$inverse.csv");  	
+		$result=system("./go -seed $seed -inverse -2 -start_hour $start_hour >> start_hour/start_hour_$start_hour.csv");  	
 	}
 }
 

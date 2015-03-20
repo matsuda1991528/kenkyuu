@@ -22,6 +22,9 @@ int main(int argc, char **argv){
 		else if(strcmp(*argv, "-inverse") == 0){
 			inverse_parameter = atof(*++argv);
 		}
+		else if(strcmp(*argv, "-start_hour") == 0){
+			start_hour = atoi(*++argv);
+		}
 		else{
 			printf("invailed command\n");
 			exit(1);
@@ -58,7 +61,7 @@ int main(int argc, char **argv){
 		ga_population_child = generatePopulation(ga_population_parent, map_data, drop_node_head);
 		ga_population_parent = ga_population_child;
 		generation++;
-		printf("%f,", ga_population_parent.elite_individual.fitness);
+		//printf("%f,", ga_population_parent.elite_individual.fitness);
 		/*
 		printf("%d\n", ga_population_parent.elite_individual.wait_time);
 		printIndividual(ga_population_parent.elite_individual, ga_population_parent.gene_length);
@@ -71,7 +74,8 @@ int main(int argc, char **argv){
 	printf("fitness = %f\n", ga_population_parent.elite_individual.fitness);
 	printf("%d\n", ga_population_parent.elite_individual.wait_time);
 	printIndividual(ga_population_parent.elite_individual, ga_population_parent.gene_length);	
-	*/
+	printRoute(ga_population_parent.elite_individual, ga_population_parent.gene_length, map_data);
+*/
 	//printf("gene time = %f\n", (double)((end - rap) / 1000));
 	return 0;
 }

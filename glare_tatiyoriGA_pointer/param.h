@@ -4,7 +4,9 @@
 
 #define START 497
 #define GOAL 498
-#define MOVE_SPEED 600 //[km/h]
+//#define START 1
+//#define GOAL 41
+#define MOVE_SPEED 6000 //[km/h]
 #define UNIT_OF_TRAVTIME 60   /* ˆÚ“®ŽžŠÔ’PˆÊ[h]‚É‚µ‚½‚¢ê‡ -> 1,  [minuite]‚É‚µ‚½‚¢ê‡ -> 60 */
 #define DATABASE_SIZE 25         /* step size:30[min] -> 24*2=48    step size:1[hour] -> 24*1=24 */
 #define DATABASE_INTERVAL 2.0
@@ -24,7 +26,7 @@
 
 #define START_HOUR 17
 #define START_MIN 0
-#define GENERATION 1000
+#define GENERATION 100
 #define IND_NUM 5
 
 #endif

@@ -16,7 +16,7 @@ struct route_data_t serch_route(int start, int goal, struct map_data_t map_data,
 	double departure_hour, departure_min;
 	int i, j, p;
 	
-	departure_hour = START_HOUR + floor(START_MIN + departure_time / 60.0f);
+	departure_hour = start_hour + floor(START_MIN + departure_time / 60.0f);
 	departure_min =  fmod(START_MIN + departure_time, 60.0f);
 	
 	for(i=1;i<map_data.node_size;i++){
@@ -43,7 +43,7 @@ struct route_data_t serch_route(int start, int goal, struct map_data_t map_data,
 			if(map_data.matrix_trav_time[p][j] != INF){
 				arrival_time = ((time[p] + map_data.matrix_trav_time[p][j] + departure_min) / 60.0) + departure_hour;
 				sun_angle = getSunAngle(arrival_time);
-				if(sun_angle.elevation <= SUN_HIGH && sun_angle.elevation >= SUN_LOW && fabs(sun_angle.azimuth - map_data.matrix_trav_time[p][j]) < SUN_WIDTH){
+				if(sun_angle.elevation <= SUN_HIGH && sun_angle.elevation >= SUN_LOW && fabs(sun_angle.azimuth - matrix_angle[p][j]) < SUN_WIDTH){
 					tmp_uncom = getGlare(p, j, sun_angle) * map_data.matrix_trav_time[p][j];
 					if(uncom[p] + tmp_uncom < uncom[j]){
 						uncom[j] = uncom[p] + tmp_uncom;
@@ -65,4 +65,5 @@ struct route_data_t serch_route(int start, int goal, struct map_data_t map_data,
 	route_data.time = time[goal];
 	return route_data;
 }
+
 #endif

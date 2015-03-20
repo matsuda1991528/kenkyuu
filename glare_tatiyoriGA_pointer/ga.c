@@ -20,6 +20,34 @@ static int getMutateGene(int, double*, double, struct estimate_uncom_data_t*);
 static struct individual_t swapGene(int, int, int, struct individual_t);
 static struct ga_population_t waitTimeMutation(struct ga_population_t);
 
+
+void printIndividual(struct individual_t individual, int gene_length){
+	int i;
+	for(i=1;i<gene_length;i++)
+		printf("|%2d",individual.gene[i]);
+	printf("|\n");
+}
+
+void printRoute(struct individual_t individual, int gene_length, struct map_data_t map_data){
+	struct route_data_t route_data;
+	double current_time;
+	int i;	
+	current_time = individual.fitness = individual.wait_time;
+	//current_time += start_hour * 60 + START_MIN;
+	for(i=1;i<gene_length-1;i++){
+		route_data = serch_route(individual.gene[i], individual.gene[i+1], map_data, current_time);
+		current_time += route_data.time;
+		individual.fitness += route_data.uncom;
+		//printf("%d -> %d\n", individual.gene[i], individual.gene[i+1]);
+		//printf("time = %3.0lf:%3.0f\n", current_time/24 +start_hour, START_MIN + fmod(current_time, 24));
+		//printf("travel time = %f  uncom = %f\n", route_data.time, route_data.uncom);
+		//printf("fitness = %f\n\n", individual.fitness);
+	}
+	return;
+}
+		
+	
+
 struct ga_population_t evaluation(struct ga_population_t ga_population, struct map_data_t map_data){
 	struct route_data_t route_data;
 	double current_time;
@@ -187,7 +215,7 @@ static double getPassingTime(struct individual_t individual, int bib_genetic_loc
 		part_of_route = serch_route(individual.gene[i], individual.gene[i+1], map_data, move_min);
 		move_min += part_of_route.time;
 	}
-	return fmod(START_HOUR + (START_MIN + move_min) / 60, 24.0f);
+	return fmod(start_hour + (START_MIN + move_min) / 60, 24.0f);
 }
 
 /* DijkstraDBÇ©ÇÁbib_geneÅCpassing_timeÇ…ëŒâûÇµÇΩÇ≈Å[ÇΩÇÃéÊÇËèoÇµ */
@@ -329,13 +357,6 @@ static struct individual_t swapGene(int temp_gene, int mutate_gene, int gene_len
 		//printIndividual(individual, gene_length);
 	}
 	return individual;
-}
-
-void printIndividual(struct individual_t individual, int gene_length){
-	int i;
-	for(i=1;i<gene_length;i++)
-		printf("|%2d",individual.gene[i]);
-	printf("|\n");
 }
 
 
