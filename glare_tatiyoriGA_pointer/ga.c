@@ -6,8 +6,8 @@
 
 
 static void selection(struct ga_population_t*);
-static struct ga_population_t specificWesteringSunMutation(struct ga_population_t, struct map_data_t, struct drop_node_t*);
-static struct ga_population_t mutation(struct ga_population_t, struct map_data_t, struct drop_node_t*);
+static void specificWesteringSunMutation(struct ga_population_t*, struct map_data_t, struct drop_node_t*);
+static void mutation(struct ga_population_t*, struct map_data_t, struct drop_node_t*);
 static double getPassingTime(struct individual_t, int, struct map_data_t);
 static struct estimate_uncom_data_t *selectDijkstraUncomDB(double, int, int, int*, struct estimate_uncom_data_t*);
 static double *getEstimateTuningUncom(struct estimate_uncom_data_t*, double*, int);
@@ -18,17 +18,19 @@ static double *getEstimateRatio(double*, int, double*, double);
 static double getSumRatio(double*, int);
 static int getMutateGene(int, double*, double, struct estimate_uncom_data_t*);
 static struct individual_t swapGene(int, int, int, struct individual_t);
-static struct ga_population_t waitTimeMutation(struct ga_population_t);
+static void waitTimeMutation(struct ga_population_t*);
 
 
-void printIndividual(struct individual_t individual, int gene_length){
+void printIndividual
+(struct individual_t individual, int gene_length){
 	int i;
 	for(i=1;i<gene_length;i++)
 		printf("|%2d",individual.gene[i]);
 	printf("|\n");
 }
 
-void printRoute(struct individual_t individual, int gene_length, struct map_data_t map_data){
+void printRoute
+(struct individual_t individual, int gene_length, struct map_data_t map_data){
 	struct route_data_t route_data;
 	double current_time;
 	int i;	
@@ -66,22 +68,25 @@ void copyIndividual
 }
 
 
-struct ga_population_t evaluation
-(struct ga_population_t ga_population, struct map_data_t map_data){
+void evaluation
+(struct ga_population_t* ga_population, struct map_data_t map_data){
 	struct route_data_t route_data;
 	double current_time;
 	int i, j;
 	
 	for(i=0;i<IND_NUM;i++){
-		current_time = ga_population.individual[i].wait_time;
-		ga_population.individual[i].fitness = ga_population.individual[i].wait_time;
-		for(j=1;j<ga_population.gene_length-1;j++){
-			route_data = serch_route(ga_population.individual[i].gene[j], ga_population.individual[i].gene[j+1], map_data, current_time);
+		current_time = ga_population->individual[i].wait_time;
+		ga_population->individual[i].fitness = ga_population->individual[i].wait_time;
+		for(j=1;j<ga_population->gene_length-1;j++){
+			route_data = serch_route
+			(ga_population->individual[i].gene[j], 
+			 ga_population->individual[i].gene[j+1], 
+			 map_data, current_time);
 			current_time += route_data.time;
-			ga_population.individual[i].fitness += route_data.uncom;
+			ga_population->individual[i].fitness += route_data.uncom;
 		}
 	}
-	return ga_population;
+	return;
 }
 
 static void selection
@@ -133,20 +138,14 @@ static void selection
 
 
 /* crossover pmx method */
-static void crossover(struct ga_population_t* ga_population){
+static void crossover
+(struct ga_population_t* ga_population){
+
 	double crossover_ran;
 	int num1, num2;
-	int first_cross_point, second_cross_point;
+	int begin_cross_point, end_cross_point;
 	int cross_num1, cross_num2;
 	int i, j;
-	int tmp_gene[IND_NUM][ga_population.gene_length];
-	
-	for(i=0;i<IND_NUM;i++){
-		for(j=1;j<ga_population.gene_length;j++){
-			tmp_gene[i][j] = ga_population.individual[i].gene[j];
-		}
-	}
-	
 
 	for(i=0;i<IND_NUM;i+=2){
 		if(IND_NUM % 2 == 1 && i+1 == IND_NUM)
@@ -162,67 +161,63 @@ static void crossover(struct ga_population_t* ga_population){
 		は交叉されないようにしている．
 		*/		
 			while(1){
-				num1 = random()%(ga_population.gene_length - 3) + 2; 
-				num2 = random()%(ga_population.gene_length - 3) + 2;
+				num1 = random()%(ga_population->gene_length - 3) + 2; 
+				num2 = random()%(ga_population->gene_length - 3) + 2;
 				if(num1 != num2)
 					break;
 			}
+			
 			if(num1 < num2){
-				first_cross_point = num1;
-				second_cross_point = num2;
+				begin_cross_point = num1;
+				end_cross_point = num2;
 			}
 			else{
-				first_cross_point = num2;
-				second_cross_point = num1;
+				begin_cross_point = num2;
+				end_cross_point = num1;
 			}
-			while(first_cross_point <= second_cross_point){
-				cross_num1 = tmp_gene[i][first_cross_point];
-				cross_num2 = tmp_gene[i+1][second_cross_point];
-				for(j=2;j<ga_population.gene_length-1;j++){
-					if(tmp_gene[i][j] == cross_num1){
-						tmp_gene[i][j] = cross_num2;
+			while(begin_cross_point <= end_cross_point){
+				cross_num1 = ga_population->individual[i].gene[begin_cross_point];
+				cross_num2 = ga_population->individual[i+1].gene[end_cross_point];
+				for(j=2;j<ga_population->gene_length-1;j++){
+					if(ga_population->individual[i].gene[j] == cross_num1){
+						ga_population->individual[i].gene[j] = cross_num2;
 					}
-					else if(tmp_gene[i][j] == cross_num2){
-						tmp_gene[i][j] = cross_num1;
-					}
-				}
-				for(j=2;j<ga_population.gene_length-1;j++){
-					if(tmp_gene[i+1][j] == cross_num1){
-						tmp_gene[i+1][j] = cross_num2;
-					}
-					else if(tmp_gene[i+1][j] == cross_num2){
-						tmp_gene[i+1][j] = cross_num1;
+					else if(ga_population->individual[i].gene[j] == cross_num2){
+						ga_population->individual[i].gene[j] = cross_num1;
 					}
 				}
-				first_cross_point++;
+				for(j=2;j<ga_population->gene_length-1;j++){
+					if(ga_population->individual[i+1].gene[j] == cross_num1){
+						ga_population->individual[i+1].gene[j] = cross_num2;
+					}
+					else if(ga_population->individual[i+1].gene[j] == cross_num2){
+						ga_population->individual[i+1].gene[j] = cross_num1;
+					}
+				}
+				begin_cross_point++;
 			}
 		}
 	}
-	for(i=0;i<IND_NUM;i++){
-		for(j=1;j<ga_population.gene_length;j++){
-			ga_population.individual[i].gene[j] = tmp_gene[i][j];
-		}
-	}
-	return ga_population;
+	return;
 }
 
 /* 通常の突然変異法 */
-static struct ga_population_t normalMutation(struct ga_population_t ga_population){
+static void normalMutation(struct ga_population_t* ga_population){
 	double mutation_ran;
 	int i, j, num, temp;
 	
 	for(i=0;i<IND_NUM;i++){
-		for(j=2;j<ga_population.gene_length-1;j++){
+		for(j=2;j<ga_population->gene_length-1;j++){
 			mutation_ran = random()%1000+1;
 			if(mutation_ran <= mutation_rate){
-				num = random()%(ga_population.gene_length-3)+2;
-				temp = ga_population.individual[i].gene[j];
-				ga_population.individual[i].gene[j] = ga_population.individual[i].gene[num];
-				ga_population.individual[i].gene[num] = temp;
+				num = random()%(ga_population->gene_length-3)+2;
+				temp = ga_population->individual[i].gene[j];
+				ga_population->individual[i].gene[j] = ga_population->individual[i].gene[num];
+				ga_population->individual[i].gene[num] = temp;
 			}
 		}
 	}
-	return ga_population;
+	return;
 }
 
 /* 以下，西日特化突然変異関係 */
@@ -395,45 +390,53 @@ static struct individual_t swapGene(int temp_gene, int mutate_gene, int gene_len
 }
 
 
-static struct ga_population_t specificWesteringSunMutation(struct ga_population_t ga_population, struct map_data_t map_data, struct drop_node_t *drop_node_head){
-	int *drop_node_num = (int *)malloc(sizeof(int) * ga_population.gene_length);
+static void specificWesteringSunMutation
+(struct ga_population_t* ga_population, struct map_data_t map_data, struct drop_node_t *drop_node_head){
+	int *drop_node_num = (int *)malloc(sizeof(int) * ga_population->gene_length);
 	int mutate_gene;
 	double mutation_ran;
 	double passing_time;  //待ち時間＋参照遺伝子座までの移動時間
 	int i, j;
-	struct estimate_uncom_data_t *estimate_uncom_array = (struct estimate_uncom_data_t *)malloc(sizeof(struct estimate_uncom_data_t) * ga_population.gene_length);
+	struct estimate_uncom_data_t *estimate_uncom_array = 
+	(struct estimate_uncom_data_t *)malloc(sizeof(struct estimate_uncom_data_t) * ga_population->gene_length);
 	double sum_tuning_uncom, avg_tuning_uncom, sum_ratio, ratio_ran;
-	double *estimate_tuning_uncom = (double *)malloc(sizeof(double) * ga_population.gene_length);
-	double *estimate_dev = (double *)malloc(sizeof(double) * ga_population.gene_length);
-	double *estimate_ratio = (double *)malloc(sizeof(double) * ga_population.gene_length);
+	double *estimate_tuning_uncom = (double *)malloc(sizeof(double) * ga_population->gene_length);
+	double *estimate_dev = (double *)malloc(sizeof(double) * ga_population->gene_length);
+	double *estimate_ratio = (double *)malloc(sizeof(double) * ga_population->gene_length);
 	
 	for(i=0;i<IND_NUM;i++){
-		for(j=1;j<ga_population.gene_length-2;j++){
+		for(j=1;j<ga_population->gene_length-2;j++){
 			mutation_ran = random()%1000+1;
 			if(mutation_ran <= mutation_rate){
 				drop_node_num = getDropNodeNum(drop_node_num, drop_node_head);
-				passing_time = getPassingTime(ga_population.individual[i], j, map_data);
-				estimate_uncom_array = selectDijkstraUncomDB(passing_time, ga_population.gene_length, ga_population.individual[i].gene[j], drop_node_num, estimate_uncom_array);
+				passing_time = getPassingTime(ga_population->individual[i], j, map_data);
+				estimate_uncom_array = 
+				selectDijkstraUncomDB(passing_time, ga_population->gene_length, 
+													ga_population->individual[i].gene[j], 
+													drop_node_num, 
+													estimate_uncom_array);
 				/*
 				変異確率の割り当て
 				ただし，始発点，終着点への変異比率は０に設定
 				*/
-				estimate_tuning_uncom = getEstimateTuningUncom(estimate_uncom_array, estimate_tuning_uncom, ga_population.gene_length);
-				sum_tuning_uncom = getSumTuningUncom(ga_population.gene_length, estimate_tuning_uncom);
-				avg_tuning_uncom = sum_tuning_uncom / (ga_population.gene_length - 4);
+				estimate_tuning_uncom = getEstimateTuningUncom(estimate_uncom_array, 
+																							   estimate_tuning_uncom, 
+																							   ga_population->gene_length);
+				sum_tuning_uncom = getSumTuningUncom(ga_population->gene_length, estimate_tuning_uncom);
+				avg_tuning_uncom = sum_tuning_uncom / (ga_population->gene_length - 4);
 				/*　各立ち寄り地間の推定不快度の標準偏差を求める　*/
-				estimate_dev = getEstimateDev(estimate_dev, estimate_tuning_uncom, avg_tuning_uncom, ga_population.gene_length);
+				estimate_dev = getEstimateDev(estimate_dev, 
+																 estimate_tuning_uncom, 
+																 avg_tuning_uncom, 
+																 ga_population->gene_length);
 				/* 各立ち寄り地間の変異比率を求める */
-				estimate_ratio = getEstimateRatio(estimate_ratio, ga_population.gene_length, estimate_dev, sum_tuning_uncom);				
+				estimate_ratio = getEstimateRatio(estimate_ratio,
+																	ga_population->gene_length, 
+																	estimate_dev,
+																	sum_tuning_uncom);				
 				/* 突然変異比率に基づいて突然変異 */
-				sum_ratio = getSumRatio(estimate_ratio, ga_population.gene_length);
+				sum_ratio = getSumRatio(estimate_ratio, ga_population->gene_length);
 				/* ratioを百分率に整える */
-				/*
-				for(k=2;k<ga_population.gene_length;k++){
-					//printf("estimate_ratio[%d] = %f/%f * 100\n", k, estimate_ratio[k], sum_ratio);
-					estimate_ratio[k] = estimate_ratio[k] / sum_ratio * 100;
-				}
-				*/
 				/*
 				int k;
 				printf("*************************\n");
@@ -449,16 +452,13 @@ static struct ga_population_t specificWesteringSunMutation(struct ga_population_
 				*/
 				ratio_ran = random()%(int)sum_ratio;
 				
-				mutate_gene = getMutateGene(ga_population.gene_length, estimate_ratio, ratio_ran, estimate_uncom_array);
-				//printf("before swap ind_num:%d\n", i);
-				//printf("%d <-> %d\n", ga_population.individual[i].gene[j+1], mutate_gene);
-				ga_population.individual[i] = swapGene(ga_population.individual[i].gene[j+1], mutate_gene, ga_population.gene_length, ga_population.individual[i]);
-				//printIndividual(ga_population.individual[i], ga_population.gene_length);
-				//printf("\n");
-				//printf("*************************\n");
-				//printf("after swap\n");
-				//printIndividual(ga_population.elite_individual, ga_population.gene_length);
-				//printf("\n");
+				mutate_gene = getMutateGene(ga_population->gene_length, 
+																estimate_ratio, ratio_ran,
+																estimate_uncom_array);
+																
+				ga_population->individual[i] = swapGene(ga_population->individual[i].gene[j+1], 
+																		   mutate_gene, ga_population->gene_length, 
+																		   ga_population->individual[i]);
 				break;
 			}
 		}
@@ -468,7 +468,7 @@ static struct ga_population_t specificWesteringSunMutation(struct ga_population_
 	free(estimate_tuning_uncom);
 	free(estimate_dev);
 	free(estimate_ratio);
-	return ga_population;
+	return;
 }
 								
 /* 
@@ -476,52 +476,62 @@ static struct ga_population_t specificWesteringSunMutation(struct ga_population_
 MUTATION_METHOD == 0 -> 通常の突然変異
 MUTATION_METHOD == 1 -> 西日特化突然変異
  */
-static struct ga_population_t mutation(struct ga_population_t ga_population, struct map_data_t map_data, struct drop_node_t *drop_node_head){
+static void mutation
+(struct ga_population_t* ga_population, struct map_data_t map_data, struct drop_node_t *drop_node_head){
 	switch(MUTATION_METHOD){
 		case 0:
-			ga_population = normalMutation(ga_population);
+			normalMutation(ga_population);
 			break;
 		case 1:
-			ga_population = specificWesteringSunMutation(ga_population, map_data, drop_node_head);
+			specificWesteringSunMutation(ga_population, map_data, drop_node_head);
 			break;
 		default:
 			printf("invailed number on MUTATION_METHOD\n");
 			exit(1);
 	}
-	return ga_population;
+	return;
 }
 
-/* 待ち時間突然変異 */
-static struct ga_population_t waitTimeMutation(struct ga_population_t ga_population){
+/* 待ち時間遺伝子の突然変異を行う */
+static void waitTimeMutation
+(struct ga_population_t* ga_population){
+
 	int i;
 	double wait_time_mutation_ran;
 	for(i=0;i<IND_NUM;i++){
 		wait_time_mutation_ran = random()%1000+1;
 		if(wait_time_mutation_ran < wait_time_mutation_rate){
-			ga_population.individual[i].wait_time = random()%MAX_WAIT_TIME;
+			ga_population->individual[i].wait_time = random()%MAX_WAIT_TIME;
 		}
 	}
-	return ga_population;
+	
+	return;
 }
 
-struct ga_population_t saveElite(struct ga_population_t ga_population){
-	int i, j;
+/* 
+解候補集団にさらに良い個体が見つかれば， 
+エリート個体を更新する
+*/
+void saveElite
+(struct ga_population_t* ga_population){
+	int i;
+	
 	for(i=0;i<IND_NUM;i++){
-		if(ga_population.elite_individual.fitness > ga_population.individual[i].fitness){
-			for(j=1;j<ga_population.gene_length;j++)
-				ga_population.elite_individual.gene[j] = ga_population.individual[i].gene[j];
-			ga_population.elite_individual.wait_time = ga_population.individual[i].wait_time;
-			ga_population.elite_individual.fitness = ga_population.individual[i].fitness;
-			//printf("\nupdate!!!!!!!!!!\n\n");
+		if(ga_population->elite_individual.fitness > ga_population->individual[i].fitness){
+			copyIndividual(&ga_population->elite_individual, 
+								  &ga_population->individual[i], 
+								  ga_population->gene_length);
 		}
 	}
-	return ga_population;
+	
+	return;
 }
 
 /*
 個体番号が一番後ろの個体にエリート個体を挿入する
 */
-void insertElite(struct ga_population_t* ga_population){
+void insertElite
+(struct ga_population_t* ga_population){
 
 	copyIndividual(&ga_population->individual[IND_NUM-1], 
 						  &ga_population->elite_individual, 
@@ -531,14 +541,16 @@ void insertElite(struct ga_population_t* ga_population){
 }
 
 	
-struct ga_population_t generatePopulation(struct ga_population_t ga_population_parent, struct map_data_t map_data, struct drop_node_t *drop_node_head){
+struct ga_population_t generatePopulation
+(struct ga_population_t ga_population_parent, struct map_data_t map_data, struct drop_node_t *drop_node_head){
+	
 	selection(&ga_population_parent);
 	insertElite(&ga_population_parent);
 	crossover(&ga_population_parent);
-	ga_population_parent = mutation(ga_population_parent, map_data, drop_node_head);
-	ga_population_parent = waitTimeMutation(ga_population_parent);
-	ga_population_parent = evaluation(ga_population_parent, map_data);
-	ga_population_parent = saveElite(ga_population_parent);
+	mutation(&ga_population_parent, map_data, drop_node_head);
+	waitTimeMutation(&ga_population_parent);
+	evaluation(&ga_population_parent, map_data);
+	saveElite(&ga_population_parent);
 	
 	return ga_population_parent;
 }

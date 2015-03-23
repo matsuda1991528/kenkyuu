@@ -62,13 +62,13 @@ int main(int argc, char **argv){
 	ga_population_parent = getPopulation(ga_population_parent, drop_node_head);
 	
 	/* 解候補集団の適応度を評価する */
-	ga_population_parent = evaluation(ga_population_parent, map_data);
+	evaluation(&ga_population_parent, map_data);
 	
 	/* 一番最初のエリートの不快度値を挿入する */
 	ga_population_parent.elite_individual.fitness = INITIAL_SET_FITNESS;
 	
 	/* エリート保存 */
-	ga_population_parent = saveElite(ga_population_parent);
+	saveElite(&ga_population_parent);
 	
 	/* generationの回数分，解候補は進化を繰り返す */
 	while(generation < GENERATION){

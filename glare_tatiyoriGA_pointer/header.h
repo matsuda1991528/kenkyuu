@@ -92,7 +92,7 @@ struct dijkstra_uncom_data_t *setEstimateUncomDB(struct drop_node_t *drop_node, 
 struct sun_angle_t getSunAngle(double);
 double getGlare(int, int, struct sun_angle_t);
 struct ga_population_t generatePopulation(struct ga_population_t, struct map_data_t, struct drop_node_t *drop_node_head);
-struct ga_population_t evaluation(struct ga_population_t, struct map_data_t);
+void evaluation(struct ga_population_t*, struct map_data_t);
 struct route_data_t serch_route(int, int, struct map_data_t, double);
-struct ga_population_t saveElite(struct ga_population_t);
+void saveElite(struct ga_population_t*);
 #endif
