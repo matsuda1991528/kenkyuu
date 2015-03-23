@@ -5,7 +5,7 @@
 #include"param.h"
 
 
-static struct ga_population_t selection(struct ga_population_t);
+static void selection(struct ga_population_t*);
 static struct ga_population_t specificWesteringSunMutation(struct ga_population_t, struct map_data_t, struct drop_node_t*);
 static struct ga_population_t mutation(struct ga_population_t, struct map_data_t, struct drop_node_t*);
 static double getPassingTime(struct individual_t, int, struct map_data_t);
@@ -46,9 +46,28 @@ void printRoute(struct individual_t individual, int gene_length, struct map_data
 	return;
 }
 		
+/* 
+個体をコピーする
+コピー内容は遺伝子，待ち時間遺伝子，適応度である． 
+コピー先の個体→destination_individual
+コピー元の個体→source_individual
+*/
+void copyIndividual
+(struct individual_t *destination_individual, struct individual_t *source_individual, int gene_length){
+	int i;
 	
+	for(i=1;i<gene_length;i++){
+		destination_individual->gene[i] = source_individual->gene[i];
+	}	
+	destination_individual->wait_time = source_individual->wait_time;
+	destination_individual->fitness = source_individual->fitness;
+	
+	return;
+}
 
-struct ga_population_t evaluation(struct ga_population_t ga_population, struct map_data_t map_data){
+
+struct ga_population_t evaluation
+(struct ga_population_t ga_population, struct map_data_t map_data){
 	struct route_data_t route_data;
 	double current_time;
 	int i, j;
@@ -65,47 +84,56 @@ struct ga_population_t evaluation(struct ga_population_t ga_population, struct m
 	return ga_population;
 }
 
-static struct ga_population_t selection(struct ga_population_t ga_population_past){
-	int num1, num2, i, j;
-	int tmp_gene[IND_NUM][ga_population_past.gene_length];
-	int wait_time[IND_NUM];
-	double fitness[IND_NUM];
-	//print_gene(ga_population_past);
+static void selection
+(struct ga_population_t* ga_population){
+
+	int num1, num2, i;
+	struct ga_population_t ga_population_new;
+	ga_population_new.gene_length = ga_population->gene_length;
+	gene_malloc(&ga_population_new);
 	
 	for(i=0;i<IND_NUM;i++){
+		/* トーナメントにかける個体をランダムに選択する */
 		while(1){
 			num1 = random()%IND_NUM;
 			num2 = random()%IND_NUM;
 			if(num1 != num2)
 				break;
 		}
-		//printf("individual[%d].fitness = %f    individual[%d].fitness = %f\n", num1, ga_population_past.individual[num1].fitness, num2, ga_population_past.individual[num2].fitness);
-		if(ga_population_past.individual[num1].fitness < ga_population_past.individual[num2].fitness){
-			for(j=1;j<ga_population_past.gene_length;j++)
-				tmp_gene[i][j] = ga_population_past.individual[num1].gene[j];
-			wait_time[i] = ga_population_past.individual[num1].wait_time;
-			fitness[i] = ga_population_past.individual[num1].fitness;
+		
+		/* トーナメントに個体で適応度が低い方を選択していく */
+		if(ga_population->individual[num1].fitness < ga_population->individual[num2].fitness){
+			copyIndividual(&ga_population_new.individual[i], 
+								  &ga_population->individual[num1], 
+								  ga_population->gene_length);
 		}else{
-			for(j=1;j<ga_population_past.gene_length;j++)
-				tmp_gene[i][j] = ga_population_past.individual[num2].gene[j];
-			wait_time[i] = ga_population_past.individual[num2].wait_time;
-			fitness[i] = ga_population_past.individual[num2].fitness;
+			copyIndividual(&ga_population_new.individual[i], 
+								  &ga_population->individual[num2], 
+								  ga_population->gene_length);
 		}
 	}
 	
+	/* 
+	最後に戻す．
+	戻さないと，値は書き換わらないぞ！
+	*/
 	for(i=0;i<IND_NUM;i++){
-		for(j=1;j<ga_population_past.gene_length;j++)
-			ga_population_past.individual[i].gene[j] = tmp_gene[i][j];
-		ga_population_past.individual[i].wait_time = wait_time[i];
-		ga_population_past.individual[i].fitness = fitness[i];
+		copyIndividual(&ga_population->individual[i], 
+							  &ga_population_new.individual[i], 
+							  ga_population->gene_length);
 	}
 	
-	return ga_population_past;
+	for(i=0;i<IND_NUM;i++){
+		free(ga_population_new.individual[i].gene);
+	}
+	free(ga_population_new.elite_individual.gene);
+	
+	return;
 }
 
 
 /* crossover pmx method */
-static struct ga_population_t crossover(struct ga_population_t ga_population){
+static void crossover(struct ga_population_t* ga_population){
 	double crossover_ran;
 	int num1, num2;
 	int first_cross_point, second_cross_point;
@@ -123,11 +151,18 @@ static struct ga_population_t crossover(struct ga_population_t ga_population){
 	for(i=0;i<IND_NUM;i+=2){
 		if(IND_NUM % 2 == 1 && i+1 == IND_NUM)
 			break;
-		
+
+/* crossover するか否かの判定 */			
 		crossover_ran = random()%100+1;
 		if(crossover_ran <= crossover_rate){
+		
+		/* 
+		それぞれの個体に対して交叉点をランダムに選択する 
+		ただし，始発点，終着点（個体の両端に格納されている遺伝子）
+		は交叉されないようにしている．
+		*/		
 			while(1){
-				num1 = random()%(ga_population.gene_length - 3) + 2; //始発点は交叉されないようにする為．
+				num1 = random()%(ga_population.gene_length - 3) + 2; 
 				num2 = random()%(ga_population.gene_length - 3) + 2;
 				if(num1 != num2)
 					break;
@@ -483,25 +518,27 @@ struct ga_population_t saveElite(struct ga_population_t ga_population){
 	return ga_population;
 }
 
-struct ga_population_t insertElite(struct ga_population_t ga_population){
-	int i;
-	for(i=1;i<ga_population.gene_length;i++)
-		ga_population.individual[IND_NUM-1].gene[i] = ga_population.elite_individual.gene[i];
-	ga_population.individual[IND_NUM-1].wait_time = ga_population.elite_individual.wait_time;
-	ga_population.individual[IND_NUM-1].fitness = ga_population.elite_individual.fitness;
-	return ga_population;
+/*
+個体番号が一番後ろの個体にエリート個体を挿入する
+*/
+void insertElite(struct ga_population_t* ga_population){
+
+	copyIndividual(&ga_population->individual[IND_NUM-1], 
+						  &ga_population->elite_individual, 
+						  ga_population->gene_length);
+						  
+	return;
 }
 
 	
 struct ga_population_t generatePopulation(struct ga_population_t ga_population_parent, struct map_data_t map_data, struct drop_node_t *drop_node_head){
-	struct ga_population_t ga_population_current = gene_malloc(ga_population_current);
-	ga_population_current = selection(ga_population_parent);
-	ga_population_current = insertElite(ga_population_current);
-	ga_population_current = crossover(ga_population_current);
-	ga_population_current = mutation(ga_population_current, map_data, drop_node_head);
-	ga_population_current = waitTimeMutation(ga_population_current);
-	ga_population_current = evaluation(ga_population_current, map_data);
-	ga_population_current = saveElite(ga_population_current);
+	selection(&ga_population_parent);
+	insertElite(&ga_population_parent);
+	crossover(&ga_population_parent);
+	ga_population_parent = mutation(ga_population_parent, map_data, drop_node_head);
+	ga_population_parent = waitTimeMutation(ga_population_parent);
+	ga_population_parent = evaluation(ga_population_parent, map_data);
+	ga_population_parent = saveElite(ga_population_parent);
 	
-	return ga_population_current;
+	return ga_population_parent;
 }

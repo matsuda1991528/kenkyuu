@@ -1,0 +1,3 @@
+gcc -Wl,--stack,10485760 -g -c main.c getMapData.c createGene.c  setEstimateUncom.c glare.c getSunAngle.c ga.c serch_route.c -W -Wall
+ gcc -o go main.o getMapData.o createGene.o setEstimateUncom.o glare.o getSunAngle.o ga.o serch_route.o
+ ./go -seed 1 -inverse -2 -start_hour 17 

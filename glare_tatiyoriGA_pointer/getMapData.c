@@ -179,7 +179,7 @@ static struct drop_node_t *drop_node_malloc(void){
 
 /* ファイルから立ち寄り地情報を取得 */
 static struct drop_node_t *getDropNodeFromFile(void){
-	char *fname = "map500/visitPos20.csv";
+	char *fname = "map500/visitPos10.csv";
 	FILE *fp;
 	char dummy[255];
 	struct drop_node_t *head, *drop_node, *old;

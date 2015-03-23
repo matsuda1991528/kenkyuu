@@ -19,6 +19,8 @@
 #define DROP_NODE_STYLE 1     /* 1->立ち寄り地をファイルから読み込み  2->立ち寄り地ランダム生成 */
 #define DROP_NODE_NUM 5         /* DROP_NODE_STYLE=0の際に立ち寄り地数の選定 */
 
+#define INITIAL_SET_FITNESS 99999
+
 /* 西日直射範囲 */
 #define SUN_HIGH 25
 #define SUN_LOW 0

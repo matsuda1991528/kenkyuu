@@ -29,14 +29,36 @@ int setGeneLength(struct drop_node_t *drop_node){
 	return gene_size;
 }
 
-/* 遺伝子長分のメモリを確保 */
-struct ga_population_t gene_malloc(struct ga_population_t ga_population){
+/* 
+遺伝子長分のメモリを確保
+個体を示すindividual_t は配列
+ga_population_tはポインタ
+で宣言されているため，
+ga_population->individual.gene
+という形になっている．
+見栄えの問題だが，後々個体数も動的確保する必要あり
+ポインタ渡しをする際は，遺伝子長を格納した後に行う事．
+ */
+void gene_malloc(struct ga_population_t* ga_population){
 	int i;
 	for(i=0;i<IND_NUM;i++){
-		ga_population.individual[i].gene = (int *)malloc(sizeof(int) * ga_population.gene_length);
+		ga_population->individual[i].gene
+		= (int *)malloc(sizeof(int) * ga_population->gene_length);
+
+		if(ga_population->individual[i].gene == NULL){
+			printf("cannnot gene_malloc memory\n");
+			exit(1);
+		}
 	}
-	ga_population.elite_individual.gene = (int *)malloc(sizeof(int) * ga_population.gene_length);
-	return ga_population;
+	
+	ga_population->elite_individual.gene
+	= (int *)malloc(sizeof(int) * ga_population->gene_length);
+
+	if(ga_population->elite_individual.gene == NULL){
+		printf("cannnot gene_malloc memory\n");
+		exit(1);
+	}
+	return;
 }
 
 void copyCheckRepeatDropNode(struct drop_node_t *drop_node, struct check_repeat_drop_t *check_repeat_drop){

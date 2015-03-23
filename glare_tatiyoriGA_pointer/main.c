@@ -40,26 +40,43 @@ int main(int argc, char **argv){
 	struct ga_population_t ga_population_parent, ga_population_child; 
 	int generation = 0;
 
-	/* 立ち寄り地情報の取得 */
+	/* 各立ち寄り地の座標情報を取得する */
 	drop_node_head = getDropNode(DROP_NODE_NUM, map_data.node_size);
-	/* 立ち寄り地(=遺伝子長)の取得 */
-	ga_population_child.gene_length = ga_population_parent.gene_length = setGeneLength(drop_node_head);
-	/* dijkstra不快度のデータベース作成 */
-	dijkstra_uncom_db = setEstimateUncomDB(drop_node_head, ga_population_parent.gene_length, map_data);
-	/* メモリ確保の際はheadを返さないといけない　多分ga_population_t は構造体と認識されるのだろう */
-	ga_population_parent = gene_malloc(ga_population_parent);
-	ga_population_child = gene_malloc(ga_population_child);
-	//printf("length = %d\n", ga_population_parent.gene_length);
-	/* 解候補集団の生成 */
+	
+	/* 立ち寄り地数(=遺伝子長)を取得する */
+	ga_population_child.gene_length = ga_population_parent.gene_length
+	= setGeneLength(drop_node_head);
+	
+	/* 各時刻における各立ち寄り地間のdijkstra不快度のデータベース作成 */
+	dijkstra_uncom_db
+	= setEstimateUncomDB(drop_node_head, ga_population_parent.gene_length, map_data);
+	
+	/* 
+	メモリ確保の際はheadを返さないといけない．
+	多分ga_population_t は構造体と認識されるのだろう
+	*/
+	gene_malloc(&ga_population_parent);
+	gene_malloc(&ga_population_child);
+	
+	/* 最初の解候補集団をランダムに生成 */
 	ga_population_parent = getPopulation(ga_population_parent, drop_node_head);
+	
+	/* 解候補集団の適応度を評価する */
 	ga_population_parent = evaluation(ga_population_parent, map_data);
-	ga_population_parent.elite_individual.fitness = 99999;
+	
+	/* 一番最初のエリートの不快度値を挿入する */
+	ga_population_parent.elite_individual.fitness = INITIAL_SET_FITNESS;
+	
+	/* エリート保存 */
 	ga_population_parent = saveElite(ga_population_parent);
-	//print_gene(ga_population_parent);
-	//printf("rap time = %f\n", (double)((rap - start) / 1000));
+	
+	/* generationの回数分，解候補は進化を繰り返す */
 	while(generation < GENERATION){
-		ga_population_child = generatePopulation(ga_population_parent, map_data, drop_node_head);
+		ga_population_child
+		= generatePopulation(ga_population_parent, map_data, drop_node_head);
+		
 		ga_population_parent = ga_population_child;
+		
 		generation++;
 		//printf("%f,", ga_population_parent.elite_individual.fitness);
 		/*

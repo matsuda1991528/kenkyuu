@@ -80,13 +80,14 @@ int seed;
 
 void print_gene(struct ga_population_t);
 void printIndividual(struct individual_t, int);
+void copyIndividual(struct individual_t*, struct individual_t*, int);
 struct map_data_t getMapData(void);
 struct drop_node_t *getDropNode(int, int);
 int setGeneLength(struct drop_node_t *drop_node);
 void copyCheckRepeatDropNode(struct drop_node_t *drop_node, struct check_repeat_drop_t *check_repeat_drop);
 struct ga_population_t getPopulation(struct ga_population_t ga_population, struct drop_node_t *drop_node_head);
 void checkRepeatGene(struct ga_population_t, struct check_repeat_drop_t *check_repeat_drop);
-struct ga_population_t gene_malloc(struct ga_population_t);
+void gene_malloc(struct ga_population_t*);
 struct dijkstra_uncom_data_t *setEstimateUncomDB(struct drop_node_t *drop_node, int, struct map_data_t);
 struct sun_angle_t getSunAngle(double);
 double getGlare(int, int, struct sun_angle_t);
