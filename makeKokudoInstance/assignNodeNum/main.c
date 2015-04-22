@@ -35,7 +35,7 @@ void fileOpenCheck(FILE **fp, char *filename, char *mode){
  * else TRACE_TAILを返す
  */
 int getNodeNum(struct xy_coord_data_t target_pos, struct node_t *node){
-
+	printf("a\n");
 	while(node != NULL){
 		if(node->pos.x == target_pos.x && node->pos.y == target_pos.y){
 			return node->num;
@@ -104,8 +104,9 @@ void fWriteNodeData(struct node_t *head){
 
 	fileOpenCheck(&fp, write_fname, "wt");
 	fprintf(fp, "nodenum %d\n", node_size-1);
+	printf("a\n");
 	while(node != NULL){
-		fprintf(fp, "%4d %lf, %lf\n", node->num, node->pos.x, node->pos.y);
+		fprintf(fp, "%5d %lf %lf\n", node->num, node->pos.x, node->pos.y);
 		line_count++;
 		if(line_count % 2 == 0){
 			fprintf(fp, "\n");
