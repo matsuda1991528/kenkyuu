@@ -3,7 +3,7 @@
 
 #define MAX_LEN 256
 #define EMPTY -1
-#define INF -1
+#define INF 9999999
 
 
 /* xy座標を表現する構造体 */
@@ -31,14 +31,23 @@ struct vertex_t{
 };
 
 
+int start_vertex, goal_vertex;
+
 /* プロトタイプ宣言 */
 /* commonFunc.c */
 void fileOpenCheck(FILE**, char*, char*);
+
+/* testFunc.c */
+void checkIncludeCommand(int, int);
+void printVertexList(int, struct adj_list_t*, struct adj_list_t*);
 
 /* createAdjajencyList.c */
 int loadNodeSize(void);
 void initVertex(struct vertex_t*, int);
 void loadNodeData(struct vertex_t*, int);
 void printVertex(struct vertex_t*, int);
+
+/* serchRouteDijkstra.c */
+void serchRouteDijkstra(struct vertex_t*, int, int, int);
 
 #endif

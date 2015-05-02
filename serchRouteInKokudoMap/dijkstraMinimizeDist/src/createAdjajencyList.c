@@ -28,7 +28,7 @@ void initVertex(struct vertex_t *vertex, int node_size){
 */
 int loadNodeSize(void){
 	FILE *fp;
-	char *fname = "map_node_num.txt";
+	char *fname = "..\\map_node_num.txt";
 	char dummy[MAX_LEN];
 	int node_size;
 	fileOpenCheck(&fp, fname, "r");
@@ -98,7 +98,7 @@ void insertNullToAdjList(struct vertex_t* vertex, int node_size){
 /* ファイルからノードデータを読み込む */
 void loadNodeData(struct vertex_t* vertex, int node_size){
 	FILE *fp;
-	char *fname = "map_node_num.txt";
+	char *fname = "..\\map_node_num.txt";
 	char buf[MAX_LEN];
 	int dummy;
 	struct node_t buf_prev, buf_next;  //ノードデータを格納するバッファ
@@ -116,7 +116,6 @@ void loadNodeData(struct vertex_t* vertex, int node_size){
 
 void printVertex(struct vertex_t* vertex, int node_size){
 	int i;
-	//node_size = 10;
 	for(i=1;i<node_size;i++){
 		//printf("%5d %lf %lf |", vertex[i].node.num, vertex[i].node.pos.x, vertex[i].node.pos.y);
 		printf("|%5d| -> ", vertex[i].node.num);

@@ -1,0 +1,10 @@
+Exception: STATUS_ACCESS_VIOLATION at eip=00401DEC
+eax=001D55C0 ebx=0022CBD0 ecx=6119FDA0 edx=414D11BB esi=612D1DC8 edi=0022CD84
+ebp=0022CC38 esp=001D55A0 program=C:\cygwin\home\sosmem\matsuda\kenkyuu\serchRouteInKokudoMap\dijkstraCostDist\src\go.exe, pid 5316, thread main
+cs=001B ds=0023 es=0023 fs=003B gs=0000 ss=0023
+Stack trace:
+Frame     Function  Args
+0022CC38  00401DEC (7FED0008, 00005760, 00000001, 000055F0)
+0022CC68  00401308 (00000000, 0022CC9C, 20010100, 612D1D9A)
+0022CD28  6100842E (00000000, 0022CD84, 61007530, 00000000)
+End of stack trace
