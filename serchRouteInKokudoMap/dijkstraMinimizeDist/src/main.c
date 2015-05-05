@@ -24,9 +24,11 @@ int main(int argc, char **argv){
 	checkIncludeCommand(start_vertex, goal_vertex);
 	
 	struct vertex_t *vertex;
+		//printf("a\n");
 	/* ノードサイズの取得 */
 	int node_size = loadNodeSize();
-	
+
+	//printf("node_size = %d\n", node_size);
 	/* 隣接リストの記憶領域の取得 */	
 	vertex = (struct vertex_t *)malloc(sizeof(struct vertex_t) * node_size);
 	if(vertex == NULL){

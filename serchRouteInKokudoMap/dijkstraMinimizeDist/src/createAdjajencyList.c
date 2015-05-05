@@ -17,6 +17,7 @@ void initVertex(struct vertex_t *vertex, int node_size){
 		vertex[i].node.pos.y = EMPTY;
 		vertex[i].adj_list_head = adjListMalloc();
 		vertex[i].adj_list_old = vertex[i].adj_list_p = vertex[i].adj_list_head;
+		//printf("vertex[%d] = %p\n", i, &vertex[i]);
 	}
 	return;
 }
@@ -72,7 +73,6 @@ void copyNode(struct node_t* destination_node, struct node_t source_node){
 void setVertexData(struct vertex_t* target_vertex, struct node_t prev_node, int  next_node_num){
 	if(target_vertex->node.num == EMPTY){
 		copyNode(&target_vertex->node, prev_node);
-		target_vertex->adj_list_head = adjListMalloc();
 		target_vertex->adj_list_head->num = next_node_num;
 		target_vertex->adj_list_old = target_vertex->adj_list_head;
 	}
@@ -85,17 +85,20 @@ void setVertexData(struct vertex_t* target_vertex, struct node_t prev_node, int 
 	return;
 }
 
-
+/* リストの終端にNULLを挿入する */
 void insertNullToAdjList(struct vertex_t* vertex, int node_size){
 	int i;
 	for(i=1;i<node_size;i++){
-		vertex[i].adj_list_p = NULL;
+		vertex[i].adj_list_old->next = NULL;
 	}
 	
 	return;
 }
 	
-/* ファイルからノードデータを読み込む */
+/* 
+ファイルからノードデータを読み込む 
+読み込んだデータをリストにチェインする．
+*/
 void loadNodeData(struct vertex_t* vertex, int node_size){
 	FILE *fp;
 	char *fname = "..\\map_node_num.txt";
@@ -109,6 +112,7 @@ void loadNodeData(struct vertex_t* vertex, int node_size){
 		fscanf(fp, "%d %lf %lf", &buf_next.num, &buf_next.pos.x, &buf_next.pos.y);
 		setVertexData(&vertex[buf_prev.num], buf_prev, buf_next.num);
 		setVertexData(&vertex[buf_next.num], buf_next, buf_prev.num);
+		//printf("%d %d\n", vertex[buf_prev.num].node.num, vertex[buf_next.num].node.num);
 	}
 	insertNullToAdjList(vertex, node_size);
 }
@@ -118,7 +122,7 @@ void printVertex(struct vertex_t* vertex, int node_size){
 	int i;
 	for(i=1;i<node_size;i++){
 		//printf("%5d %lf %lf |", vertex[i].node.num, vertex[i].node.pos.x, vertex[i].node.pos.y);
-		printf("|%5d| -> ", vertex[i].node.num);
+		printf("|%d| -> ", vertex[i].node.num);
 		vertex[i].adj_list_p = vertex[i].adj_list_head;
 		while(vertex[i].adj_list_p != NULL){
 			printf("|%d|", vertex[i].adj_list_p->num);

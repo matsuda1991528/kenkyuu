@@ -1,0 +1,3 @@
+gcc -Wl, --stack,10000000 -g -c main.c serchRouteDijkstra.c testFunc.c commonFunc.c createAdjajencyList.c
+gcc -o go main.o serchRouteDijkstra.o testFunc.o commonFunc.o createAdjajencyList.o
+./go -start 1 -goal 2000
