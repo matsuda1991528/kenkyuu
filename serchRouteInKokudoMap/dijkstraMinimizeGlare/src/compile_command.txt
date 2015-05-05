@@ -1,0 +1,3 @@
+gcc -Wl,--stack,10000000 -g -c main.c commonFunc.c testFunc.c createAdjajencyList.c serchRouteDijkstra.c getSunAngle.c getGlare.c -W -Wall
+gcc -o go main.o commonFunc.o createAdjajencyList.o testFunc.o serchRouteDijkstra.o getSunAngle.o getGlare.o
+./go -start 1 -goal 2000 -dptr_h 20 -dptr_m 0 -kph 60

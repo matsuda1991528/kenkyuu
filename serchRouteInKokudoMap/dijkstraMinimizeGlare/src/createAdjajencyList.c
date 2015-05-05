@@ -72,7 +72,6 @@ void copyNode(struct node_t* destination_node, struct node_t source_node){
 void setVertexData(struct vertex_t* target_vertex, struct node_t prev_node, int  next_node_num){
 	if(target_vertex->node.num == EMPTY){
 		copyNode(&target_vertex->node, prev_node);
-		target_vertex->adj_list_head = adjListMalloc();
 		target_vertex->adj_list_head->num = next_node_num;
 		target_vertex->adj_list_old = target_vertex->adj_list_head;
 	}
@@ -85,11 +84,11 @@ void setVertexData(struct vertex_t* target_vertex, struct node_t prev_node, int 
 	return;
 }
 
-
+/* リストの終端にNULLを挿入する */
 void insertNullToAdjList(struct vertex_t* vertex, int node_size){
 	int i;
 	for(i=1;i<node_size;i++){
-		vertex[i].adj_list_p = NULL;
+		vertex[i].adj_list_old->next = NULL;
 	}
 	
 	return;
