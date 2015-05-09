@@ -1,0 +1,2 @@
+gcc main.c utmConverter.c -o go -W -Wall
+./go readMyFileName writeMyFileName
