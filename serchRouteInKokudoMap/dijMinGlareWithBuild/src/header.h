@@ -10,7 +10,7 @@
 
 #define BUILD_HIGH 5 //建物の高さ[m]
 
-#define PRINT_ROUTE 1 //0->経路を表示しない　1->経路を表示する
+#define PRINT_ROUTE 0 //0->経路を表示しない　1->経路を表示する
 #define BUILD_MODE 1 // 0->建物を考慮しない　1->建物を考慮する
 #define MEASURE_PROCESS_TIME_MODE 1 //0->処理時間を計測しない 1->処理時間を計測する
 
@@ -102,6 +102,8 @@ void printVertex(struct vertex_t*, int);
 /* serchRouteDijkstra.c */
 //void serchRouteDijkstra(struct vertex_t*, int, int, int, struct time_t, int, struct build_set_t*);
 void serchRouteDijkstra(struct vertex_t*, int, int, int, struct time_t, int, struct build_set_t);
+
+void serchRouteDistDijkstra(struct vertex_t*, int, int, int, struct time_t, int, struct build_set_t);
 
 /* getSunAngle.c */
 struct sun_angle_t getSunAngle(double);

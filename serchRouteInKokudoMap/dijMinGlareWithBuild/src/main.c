@@ -54,7 +54,8 @@ int main(int argc, char **argv){
 	//printVertex(vertex, node_size);
 	getBuildPos(&build_set);
 	
-	serchRouteDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
+	//serchRouteDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
+	serchRouteDistDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
 	free(vertex);
 
 	return 0;
