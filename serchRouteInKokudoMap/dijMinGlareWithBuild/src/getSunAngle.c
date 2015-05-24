@@ -6,6 +6,15 @@
 #include<math.h>
 #include"header.h"
 
+/*
+入力された時刻に対する太陽高度，方位を返す．
+西→180度
+北→90度
+南→270度
+東→0度
+（※角度の値域は-180<θ<180）
+*/
+
 static int day_of_year(int year, int month, int day);
 static void solarAngle(int y_day, double time, double *elevation, double *azimuth);
 
@@ -23,7 +32,12 @@ struct sun_angle_t getSunAngle(double time){
 	y_day = day_of_year(year, month, day);
 	solarAngle(y_day, time, &sun_angle.elev, &sun_angle.azim);
 	sun_angle.elev = sun_angle.elev / fact;
-	sun_angle.azim = (sun_angle.azim / fact) - 270;  //西を0度にする処理
+	sun_angle.azim = 360 - sun_angle.azim / fact;  //西を0度にする処理
+	if(sun_angle.azim < -180)
+		sun_angle.azim += 360;
+	else if(sun_angle.azim > 180)
+		sun_angle.azim -= 360;
+		
 	return sun_angle;	
 }
 #endif

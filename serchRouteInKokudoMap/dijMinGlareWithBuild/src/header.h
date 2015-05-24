@@ -10,7 +10,7 @@
 
 #define BUILD_HIGH 5 //建物の高さ[m]
 
-#define PRINT_ROUTE 0 //0->経路を表示しない　1->経路を表示する
+#define PRINT_ROUTE 1 //0->経路を表示しない　1->経路を表示する
 #define BUILD_MODE 1 // 0->建物を考慮しない　1->建物を考慮する
 #define MEASURE_PROCESS_TIME_MODE 1 //0->処理時間を計測しない 1->処理時間を計測する
 
@@ -48,9 +48,11 @@ struct time_t{
 };
 
 
+/* 建物を表す構造体 */
 struct build_pos_t{
-	int num;
-	struct xy_coord_t pos;
+	int num;       //建物番号
+	double width; //建物幅
+	struct xy_coord_t pos; //建物の中心位置
 	struct build_pos_t *next;
 };
 
@@ -108,7 +110,7 @@ double getGlare(struct sun_angle_t, double);
 
 void getBuildPos(struct build_set_t*);
 
-int getSunStateWithBuild(double, double, double, struct xy_coord_t, struct build_set_t);
+int getSunStateWithBuild(struct sun_angle_t, struct xy_coord_t, struct build_set_t);
 
 
 #endif

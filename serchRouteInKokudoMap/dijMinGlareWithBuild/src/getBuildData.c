@@ -1,10 +1,16 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<math.h>
 #include"header.h"
 
 /* struct build_pos_t型分のメモリを確保し，struct build_pos_t*　へキャストする */
 static struct build_pos_t *buildMalloc(void){
 	return (struct build_pos_t *)malloc(sizeof(struct build_pos_t));
+}
+
+/* 2点間の座標を計算する */
+static double getDist(struct xy_coord_t p1, struct xy_coord_t p2){
+	return sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
 }
 
 /* 
@@ -25,7 +31,7 @@ static struct build_pos_t *loadBuildPosData(void){
 		//中心位置の計算
 		p->pos.x = (min_pos.x + max_pos.x) / 2;
 		p->pos.y = (min_pos.y + max_pos.y) / 2;
-		//printf("%6d %f %f\n", p->num, p->pos.x, p->pos.y);
+		p->width = getDist(min_pos, max_pos) / 2;
 		
 		old->next = p;
 		old = p;
