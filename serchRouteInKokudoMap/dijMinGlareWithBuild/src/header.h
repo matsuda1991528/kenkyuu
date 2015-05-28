@@ -11,8 +11,10 @@
 #define BUILD_HIGH 5 //建物の高さ[m]
 
 #define PRINT_ROUTE 0 //0->経路を表示しない　1->経路を表示する
-#define BUILD_MODE 1 // 0->建物を考慮しない　1->建物を考慮する
+#define BUILD_MODE 0 // 0->建物を考慮しない　1->建物を考慮する
+#define ROUTE_PERPOSE 0 //0->不快度最小経路　1->距離最短経路
 #define MEASURE_PROCESS_TIME_MODE 1 //0->処理時間を計測しない 1->処理時間を計測する
+#define GRID_MODE 1 //0->地図データのグリッド無　1→地図データのグリッド化あり
 
 #define TRUE 1
 #define FALSE 0
@@ -57,9 +59,20 @@ struct build_pos_t{
 };
 
 struct build_set_t{
-	struct build_pos_t *head;
+	struct build_pos_t *head; //先頭リストはダミー
 	int build_size;
 };
+
+/* 建物データグリッドマップを表す構造体 */
+struct build_grid_t{
+	double min_y;   //グリッドの最小y座標
+	double max_y;  //グリッドの最大y座標
+	struct build_pos_t *head;  //建物リスト  //先頭リストはダミー
+	struct build_pos_t *p;
+	struct build_pos_t *old;
+};
+	
+	
 	
 
 /* 太陽角度を表す構造体 */
@@ -114,5 +127,6 @@ void getBuildPos(struct build_set_t*);
 
 int getSunStateWithBuild(struct sun_angle_t, struct xy_coord_t, struct build_set_t);
 
+void createGridMap(struct build_pos_t*);
 
 #endif

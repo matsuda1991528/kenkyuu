@@ -37,6 +37,10 @@ int main(int argc, char **argv){
 	struct vertex_t *vertex;
 	int node_size;
 	struct build_set_t build_set;
+	clock_t start, end;
+	
+	start = clock();
+	
 	/* ノードサイズの取得 */
 	node_size = loadNodeSize();
 	checkStartAndGoalNum(input.start_vertex, input.goal_vertex, node_size);
@@ -50,13 +54,22 @@ int main(int argc, char **argv){
 
 	/* リストの初期化 */
 	initVertex(vertex, node_size);
+	//頂点データの取得
 	loadNodeData(vertex, node_size);
-	//printVertex(vertex, node_size);
+	//建物データの取得
 	getBuildPos(&build_set);
+	//建物データグリッドマップの生成
+	createGridMap(build_set.head);
 	
-	//serchRouteDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
-	serchRouteDistDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
+	if(ROUTE_PERPOSE == 0)
+		serchRouteDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
+	else if(ROUTE_PERPOSE == 1)
+		serchRouteDistDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
+	
 	free(vertex);
+	
+	end = clock();
+	printf("process time : %lf[ms]\n", (double)(end - start) / 1000);
 
 	return 0;
 }

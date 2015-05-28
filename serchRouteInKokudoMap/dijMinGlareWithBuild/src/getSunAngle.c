@@ -8,15 +8,18 @@
 
 /*
 入力された時刻に対する太陽高度，方位を返す．
-西→180度
-北→90度
-南→270度
-東→0度
-（※角度の値域は-180<θ<180）
+					(北:90度)
+（西:180度） 　　　　　　（東:0度）
+　　　　　　　（南:270度）
 */
 
 static int day_of_year(int year, int month, int day);
 static void solarAngle(int y_day, double time, double *elevation, double *azimuth);
+
+/*
+timeの単位は[h]で[minute]は十進数で渡す事
+例)　16:30 -> 16.5 という表現
+*/
 
 struct sun_angle_t getSunAngle(double time){
 	int year, month, day;
@@ -25,19 +28,16 @@ struct sun_angle_t getSunAngle(double time){
 	struct sun_angle_t sun_angle;
 	
 	fact = M_PI / 180; //度数法の角度　×　fact = 弧度法（ラジアン変換）
-	year = 2014;
+	year = 2015;
 	month = 6;
 	day = 21;
 	
 	y_day = day_of_year(year, month, day);
 	solarAngle(y_day, time, &sun_angle.elev, &sun_angle.azim);
 	sun_angle.elev = sun_angle.elev / fact;
-	sun_angle.azim = 360 - sun_angle.azim / fact;  //西を0度にする処理
-	if(sun_angle.azim < -180)
-		sun_angle.azim += 360;
-	else if(sun_angle.azim > 180)
-		sun_angle.azim -= 360;
-		
+	sun_angle.azim = abs(360 - (sun_angle.azim / fact));  //角度を反転させる
+	sun_angle.azim = fmod(sun_angle.azim + 90, 360); 
+	
 	return sun_angle;	
 }
 #endif

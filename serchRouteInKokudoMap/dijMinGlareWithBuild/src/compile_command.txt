@@ -1,2 +1,2 @@
-gcc -Wl,--stack,100000000 -g main.c commonFunc.c createAdjajencyList.c testFunc.c serchRouteDijkstra.c getSunAngle.c getGlare.c getBuildData.c getSunState.c -o go -W -Wall
-./go -start 22000 -goal 1 -dptr_h 17 -dptr_m 0 -kph 60   
+ gcc -o go -lm -Wl,--stack,100000000 -g main.c commonFunc.c createAdjajencyList.c testFunc.c serchRouteDijkstra.c getSunAngle.c getGlare.c getBuildData.c getSunState.c serchRouteDistDijkstra.c createGridMap.c -W -Wall
+ ./go -start 22000 -goal 1 -dptr_h 19 -dptr_m 30 -kph 60
