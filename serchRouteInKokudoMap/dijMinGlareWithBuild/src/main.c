@@ -34,9 +34,12 @@ int main(int argc, char **argv){
 		}
 	}
 	checkIncludeCommand(input);
-	struct vertex_t *vertex;
-	int node_size;
-	struct build_set_t build_set;
+	struct vertex_t *vertex;  //頂点データ
+	int node_size; //頂点データサイズ
+	struct build_set_t build_set; //建物データ
+	int grid_size;
+	struct build_grid_t *build_grid;
+	build_grid = NULL;
 	clock_t start, end;
 	
 	start = clock();
@@ -58,11 +61,16 @@ int main(int argc, char **argv){
 	loadNodeData(vertex, node_size);
 	//建物データの取得
 	getBuildPos(&build_set);
-	//建物データグリッドマップの生成
-	createGridMap(build_set.head);
-	
-	if(ROUTE_PERPOSE == 0)
-		serchRouteDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
+
+	if(ROUTE_PERPOSE == 0){
+		if(GRID_MODE == 0)
+			serchRouteDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
+		else if(GRID_MODE == 1){
+			//建物データグリッドマップの生成
+			build_grid = createGridMap(build_set.head, build_grid, &grid_size);
+			serchRouteGridDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_grid, grid_size);
+		}
+	}
 	else if(ROUTE_PERPOSE == 1)
 		serchRouteDistDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
 	
