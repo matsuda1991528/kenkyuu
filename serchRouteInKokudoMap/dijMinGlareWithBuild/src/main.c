@@ -9,6 +9,7 @@
 int main(int argc, char **argv){
 	struct include_command_data_t input;
 	initIncludeCommand(&input);
+	grid_scale_fact = EMPTY;
 	
 	/* 実行時コマンドを変数に格納 */
 	while(--argc > 0 && **(++argv) == '-'){
@@ -28,6 +29,15 @@ int main(int argc, char **argv){
 		else if(strcmp(*argv, "-kph") == 0){
 			input.vel_kph = atoi(*++argv);
 		}
+		else if(strcmp(*argv, "-gx") == 0){
+			g_size.x = atof(*++argv);
+		}
+		else if(strcmp(*argv, "-gy") == 0){
+			g_size.y = atof(*++argv);
+		}
+		else if(strcmp(*argv, "-gs") == 0){
+			grid_scale_fact = atof(*++argv);
+		}
 		else{
 			printf("invailed command\n");
 			exit(1);
@@ -37,8 +47,8 @@ int main(int argc, char **argv){
 	struct vertex_t *vertex;  //頂点データ
 	int node_size; //頂点データサイズ
 	struct build_set_t build_set; //建物データ
-	int grid_size;
-	struct build_grid_t *build_grid;
+	struct grid_size_t grid_size;
+	struct build_grid_t **build_grid;
 	build_grid = NULL;
 	clock_t start, end;
 	

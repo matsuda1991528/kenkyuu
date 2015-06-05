@@ -14,7 +14,8 @@
 #define BUILD_MODE 1 // 0->建物を考慮しない　1->建物を考慮する
 #define ROUTE_PERPOSE 0 //0->不快度最小経路　1->距離最短経路
 #define MEASURE_PROCESS_TIME_MODE 1 //0->処理時間を計測しない 1->処理時間を計測する
-#define GRID_MODE 0 //0->地図データのグリッド無　1→地図データのグリッド化あり
+#define GRID_MODE  1 //0->地図データのグリッド無　1→地図データのグリッド化あり
+#define GRID_PATTERN 0 //0→影の長さに基づいたグリッド縦横幅１→コンソールから入力したグリッド縦横幅 
 
 #define TRUE 1
 #define FALSE 0
@@ -25,6 +26,10 @@ struct xy_coord_t{
 	double x;  //x座標
 	double y;  //y座標
 };
+
+//各グリッドのサイズ
+struct xy_coord_t g_size;
+double grid_scale_fact;
 
 struct node_t{
 	int num;  //ノード番号
@@ -63,10 +68,17 @@ struct build_set_t{
 	int build_size;
 };
 
+//グリッド地図のサイズを表す．
+struct grid_size_t{
+	int vertical;
+	int width;
+};
+
+
 /* 建物データグリッドマップを表す構造体 */
 struct build_grid_t{
-	double min_y;   //グリッドの最小y座標
-	double max_y;  //グリッドの最大y座標
+	struct xy_coord_t min;  //グリッド地図の最小xy座標
+	struct xy_coord_t max; //グリッド地図の最大xy座標
 	struct build_pos_t *head;  //建物リスト  //先頭リストはダミー
 	struct build_pos_t *p;
 	struct build_pos_t *old;
@@ -116,7 +128,7 @@ void printVertex(struct vertex_t*, int);
 //void serchRouteDijkstra(struct vertex_t*, int, int, int, struct time_t, int, struct build_set_t*);
 void serchRouteDijkstra(struct vertex_t*, int, int, int, struct time_t, int, struct build_set_t);
 
-void serchRouteGridDijkstra(struct vertex_t*, int, int, int, struct time_t, int, struct build_grid_t*, int);
+void serchRouteGridDijkstra(struct vertex_t*, int, int, int, struct time_t, int, struct build_grid_t**, struct grid_size_t);
 
 void serchRouteDistDijkstra(struct vertex_t*, int, int, int, struct time_t, int, struct build_set_t);
 
@@ -131,8 +143,8 @@ void getBuildPos(struct build_set_t*);
 //一括管理
 int getSunStateWithBuild(struct sun_angle_t, struct xy_coord_t, struct build_set_t);
 //グリッドで管理
-int getSunStateWithBuildFromGrid(struct sun_angle_t, struct xy_coord_t, struct build_grid_t*, int);
+int getSunStateWithBuildFromGrid(struct sun_angle_t, struct xy_coord_t, struct build_grid_t**, struct grid_size_t);
 
-struct build_grid_t* createGridMap(struct build_pos_t*, struct build_grid_t*, int*);
+struct build_grid_t** createGridMap(struct build_pos_t*, struct build_grid_t**, struct grid_size_t*);
 
 #endif
