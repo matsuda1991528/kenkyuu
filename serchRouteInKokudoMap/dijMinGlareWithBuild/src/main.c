@@ -49,6 +49,7 @@ int main(int argc, char **argv){
 	struct build_set_t build_set; //建物データ
 	struct grid_size_t grid_size;
 	struct build_grid_t **build_grid;
+	int loop_state = FALSE;
 	build_grid = NULL;
 	clock_t start, end;
 	
@@ -73,12 +74,16 @@ int main(int argc, char **argv){
 	getBuildPos(&build_set);
 
 	if(ROUTE_PERPOSE == 0){
+		initElite(node_size);
 		if(GRID_MODE == 0)
 			serchRouteDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_set);
 		else if(GRID_MODE == 1){
 			//建物データグリッドマップの生成
 			build_grid = createGridMap(build_set.head, build_grid, &grid_size);
-			serchRouteGridDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_grid, grid_size);
+			start = clock();
+			while(loop_state == FALSE){
+				loop_state = serchRouteGridDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_grid, grid_size);
+			}
 		}
 	}
 	else if(ROUTE_PERPOSE == 1)

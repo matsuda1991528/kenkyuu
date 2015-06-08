@@ -42,16 +42,6 @@ static struct grid_size_t getGridLabel(struct xy_coord_t obs_pos, struct build_g
 	int find_flag = FALSE;
 	for(grid_num.vertical=1;grid_num.vertical<grid_size.vertical;grid_num.vertical++){
 		for(grid_num.width=1;grid_num.width<grid_size.width;grid_num.width++){
-			//printf("%d %d\n", grid_num.vertical, grid_num.width);
-			/*
-			if(obs_pos.x == 270236.249225 && obs_pos.y == 3811151.733564){
-				if(build_grid[grid_num.vertical][grid_num.width].min.x > (obs_pos.x - 50) && build_grid[grid_num.vertical][grid_num.width].min.x < (obs_pos.x + 50)
-				&& build_grid[grid_num.vertical][grid_num.width].min.y > (obs_pos.y - 50) && build_grid[grid_num.vertical][grid_num.width].min.y < (obs_pos.y + 50)){
-					printf("min : %f %f\n", build_grid[grid_num.vertical][grid_num.width].min.x, build_grid[grid_num.vertical][grid_num.width].min.y);
-					printf("max : %f %f\n", build_grid[grid_num.vertical][grid_num. width].max.x, build_grid[grid_num.vertical][grid_num. width].max.y);
-				}
-			}
-			*/
 			if(build_grid[grid_num.vertical][grid_num.width].min.y <= obs_pos.y && build_grid[grid_num.vertical][grid_num. width].max.y > obs_pos.y
 			  && build_grid[grid_num.vertical][grid_num.width].min.x <= obs_pos.x && build_grid[grid_num.vertical][grid_num. width].max.x > obs_pos.x){
 				find_flag = TRUE;
@@ -101,17 +91,44 @@ static struct grid_size_t getGridLabel(struct xy_coord_t obs_pos, struct build_g
 int getSunStateWithBuildFromGrid(struct sun_angle_t sun_angle, struct xy_coord_t observe_pos, struct build_grid_t** build_grid, struct grid_size_t grid_size){
 	struct grid_size_t grid_label; //観測者が適用するグリッド番号
 	int glare_state; //グレア発生か未発生
+	static struct xy_coord_t shadow_length;
+	static int flag = FALSE;
+	int serch_state[grid_size.vertical][grid_size.width];
+	double param;
 	int i, j;
 	
-	grid_label = getGridLabel(observe_pos, build_grid, grid_size);
+	for(i=1;i<grid_size.vertical;i++){
+		for(j=1;j<grid_size.width;j++){
+			serch_state[i][j] = FALSE;
+		}
+	}
 	
+	if(flag == FALSE){
+		shadow_length = getGridLength();
+		//printf("shadow_length = %f %f\n", shadow_length.x, shadow_length.y);
+		flag = TRUE;
+	}
+	
+	grid_label = getGridLabel(observe_pos, build_grid, grid_size);
+	//printf("\n ***************************\n");
+	//printf("grid_label %d %d\n", grid_label.vertical, grid_label.width);
 	//グリッド地図を走査する
-	for(i=grid_label.vertical-1;i<=grid_label.vertical+1;i++){
-		for(j=grid_label.width-1;j<=grid_label.width;j++){
-			if(i > 0 && j > 0 && i < grid_size.vertical && j < grid_size.width){
-				glare_state = serchGlareStateFromBuild(sun_angle, observe_pos, build_grid[i][j].head);
-				if(glare_state == TRUE)
-					return TRUE;
+	//自グリッドとその最大影長の範囲内のグリッド地図を走査する．
+	for(param = 0.2; param <= 1; param += 0.2){
+		for(i=1;i<grid_size.vertical;i++){
+			for(j=1;j<grid_size.width;j++){
+				if(build_grid[i][j].min.y <= build_grid[grid_label.vertical][grid_label.width].min.y + shadow_length.y * param
+				&& build_grid[i][j].max.y >= build_grid[grid_label.vertical][grid_label.width].min.y - shadow_length.y * param
+				&& build_grid[i][j].max.x >= build_grid[grid_label.vertical][grid_label.width].min.x - shadow_length.x * param
+				&& build_grid[i][j].min.x <= build_grid[grid_label.vertical][grid_label.width].min.x
+				&& serch_state[i][j] != TRUE){
+					//printf("%d %d -> " ,i, j);
+					glare_state = serchGlareStateFromBuild(sun_angle, observe_pos, build_grid[i][j].head);
+					if(glare_state == TRUE)
+						return TRUE;
+					else
+						serch_state[i][j] = TRUE;  //グリッドに対する探索済みフラグを立てる
+				}
 			}
 		}
 	}

@@ -11,3 +11,21 @@ void fileOpenCheck(FILE **fp, char *filename, char *mode){
 	}
 	return;
 }
+
+/* エリートデータの初期化 */
+void initElite(int node_size){
+	elite.uncom = 9999;
+	elite.prev = (int *)malloc(sizeof(int) * node_size);
+	return;
+}
+
+void updateElite(double target_uncom, double target_wait, int* prev, int node_size){
+	int i;
+	elite.uncom = target_uncom;
+	elite.wait_time = target_wait;
+	for(i=1;i<node_size;i++){
+		elite.prev[i] = prev[i];
+	}
+	return;
+}
+	
