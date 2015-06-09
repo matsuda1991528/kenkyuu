@@ -42,6 +42,19 @@ static double getDist(struct xy_coord_t origin_pos, struct xy_coord_t target_pos
 	return sqrt((target_pos.x - origin_pos.x) * (target_pos.x - origin_pos.x) + (target_pos.y - origin_pos.y) * (target_pos.y - origin_pos.y));
 }
 
+//影の長さを求める
+static struct xy_coord_t getShadowLen(struct sun_angle_t sun_angle, double build_height){
+	double shadow_len;
+	struct xy_coord_t xy_shadow_len;
+	
+	shadow_len = build_height * (1 / tan(getRadian(sun_angle.elev)));
+	xy_shadow_len.y = fabs(shadow_len * sin(getRadian(sun_angle.azim)));
+	xy_shadow_len.x = fabs(shadow_len * cos(getRadian(sun_angle.azim)));
+	
+	return xy_shadow_len;
+}
+	
+
 /* 観測地の属するグリッド番号を探索 */
 static struct grid_size_t getGridLabel(struct xy_coord_t obs_pos, struct build_grid_t** build_grid, struct grid_size_t grid_size){
 	struct grid_size_t grid_num;
@@ -98,7 +111,7 @@ static struct grid_size_t getGridLabel(struct xy_coord_t obs_pos, struct build_g
 int getSunStateWithBuildFromGrid(struct sun_angle_t sun_angle, struct xy_coord_t observe_pos, struct build_grid_t** build_grid, struct grid_size_t grid_size){
 	struct grid_size_t grid_label; //観測者が適用するグリッド番号
 	int glare_state; //グレア発生か未発生
-	struct xy_coord_t shadow_length = getGridLength();
+	struct xy_coord_t shadow_length = getShadowLen(sun_angle, (double)BUILD_HIGH);
 	int i, j;
 	int count = 0;
 	
@@ -118,11 +131,6 @@ int getSunStateWithBuildFromGrid(struct sun_angle_t sun_angle, struct xy_coord_t
 	
 	
 	grid_label = getGridLabel(observe_pos, build_grid, grid_size);
-	//printf("max:%f %f\n", build_grid[grid_label.vertical][grid_label.width].max.x, build_grid[grid_label.vertical][grid_label.width].max.y);
-	//printf("min:%f %f\n", build_grid[grid_label.vertical][grid_label.width].min.x, build_grid[grid_label.vertical][grid_label.width].min.y);
-	//printf("obs:%f %f\n", observe_pos.x, observe_pos.y);
-	//printf("\n ***************************\n");
-	//printf("grid_label %d %d\n", grid_label.vertical, grid_label.width);
 	//グリッド地図を走査する
 	//自グリッドとその最大影長の範囲内のグリッド地図を走査する．
 	for(i=1;i<grid_size.vertical;i++){

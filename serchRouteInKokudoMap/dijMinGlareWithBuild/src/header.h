@@ -16,6 +16,7 @@
 #define MEASURE_PROCESS_TIME_MODE 1 //0->処理時間を計測しない 1->処理時間を計測する
 #define GRID_MODE  1 //0->地図データのグリッド無　1→地図データのグリッド化あり
 #define GRID_PATTERN 1 //0→影の長さに基づいたグリッド縦横幅１→コンソールから入力したグリッド縦横幅
+#define PRINT_GRID_MAP 0 //0->グリッド地図をファイル書き込みしない　1→ファイル書き込みする
 
 #define TEST_GRID 1 //1→グリッド分割のテスト 
 

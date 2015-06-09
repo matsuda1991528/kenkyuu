@@ -82,9 +82,9 @@ int main(int argc, char **argv){
 			//建物データグリッドマップの生成
 			build_grid = createGridMap(build_set.head, build_grid, &grid_size);
 			start = clock();
-			//while(loop_state == FALSE){
+			while(loop_state == FALSE){
 				loop_state = serchRouteGridDijkstra(vertex, node_size, input.start_vertex, input.goal_vertex, input.dptr, input.vel_kph, build_grid, grid_size);
-			//}
+			}
 		}
 	}
 	else if(ROUTE_PERPOSE == 1)
