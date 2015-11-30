@@ -8,7 +8,7 @@
 #define SUN_LOW 0
 #define SUN_WIDTH 50
 
-#define PRINT_ROUTE 1 //0->経路を表示しない　1->経路を表示する
+#define PRINT_ROUTE 0 //0->経路を表示しない　1->経路を表示する
 
 
 /* xy座標を表現する構造体 */

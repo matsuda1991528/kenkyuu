@@ -23,6 +23,7 @@ struct sun_angle_t getSunAngle(double time){
 	y_day = day_of_year(year, month, day);
 	solarAngle(y_day, time, &sun_angle.elev, &sun_angle.azim);
 	sun_angle.elev = sun_angle.elev / fact;
+	//sun_angle.azim = sun_angle.azim / fact;
 	sun_angle.azim = (sun_angle.azim / fact) - 270;  //¼‚ğ0“x‚É‚·‚éˆ—
 	return sun_angle;	
 }
