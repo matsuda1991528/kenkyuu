@@ -1,0 +1,408 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 75.62     31.57    31.57 181983995     0.00     0.00  serchRouteGridDijkstra
+  6.92     34.46     2.89 32978178     0.00     0.00  serchGlareStateFromBuild
+  4.75     36.45     1.99                             getPerpendicularDist
+  3.52     37.91     1.47        1     1.47     1.47  serchRouteDistDijkstra
+  3.52     39.38     1.47                             getRadian
+  2.37     40.38     0.99   194153     0.00     0.00  getSunStateWithBuildFromGrid
+  1.63     41.05     0.68                             _mcount_private
+  0.73     41.36     0.30                             getDist
+  0.31     41.49     0.13                             solarAngle
+  0.12     41.54     0.05                             tan
+  0.10     41.58     0.04                             _fentry__
+  0.10     41.62     0.04                             getUncom
+  0.07     41.65     0.03                             getEdgeAngle
+  0.05     41.67     0.02                             day_of_year
+  0.05     41.69     0.02                             getMaxPos
+  0.05     41.71     0.02                             sqrt
+  0.02     41.72     0.01    57862     0.00     0.00  setVertexData
+  0.02     41.73     0.01                             assignBuildToGrid
+  0.02     41.74     0.01                             buildMalloc
+  0.02     41.75     0.01                             initQueue
+  0.00     41.75     0.00  3580799     0.00     0.00  createGridMap
+  0.00     41.75     0.00  1062854     0.00     0.00  getSunAngle
+  0.00     41.75     0.00   301680     0.00     0.00  getDisability_glare
+  0.00     41.75     0.00   260444     0.00     0.00  getEndPointInXaxis
+  0.00     41.75     0.00   206860     0.00     0.00  getIlluminance
+  0.00     41.75     0.00   206860     0.00     0.00  getRadian
+  0.00     41.75     0.00   150839     0.00     0.00  copyBuild
+  0.00     41.75     0.00    62421     0.00     0.00  getSunStateWithBuild
+  0.00     41.75     0.00    57862     0.00     0.00  adjListMalloc
+  0.00     41.75     0.00    51715     0.00     0.00  get3D_angle
+  0.00     41.75     0.00    51715     0.00     0.00  getEquivalent_velling_luminance
+  0.00     41.75     0.00    51715     0.00     0.00  getGlare
+  0.00     41.75     0.00    22367     0.00     0.00  copyNode
+  0.00     41.75     0.00       13     0.00     0.00  updateElite
+  0.00     41.75     0.00        3     0.00     0.00  fileOpenCheck
+  0.00     41.75     0.00        1     0.00     0.00  checkIncludeCommand
+  0.00     41.75     0.00        1     0.00     0.00  checkStartAndGoalNum
+  0.00     41.75     0.00        1     0.00     0.00  getBuildPos
+  0.00     41.75     0.00        1     0.00     0.00  getEndPointInYaxis
+  0.00     41.75     0.00        1     0.00     0.00  getMaxBuildWidth
+  0.00     41.75     0.00        1     0.00     0.00  initBuildGrid
+  0.00     41.75     0.00        1     0.00     0.00  initElite
+  0.00     41.75     0.00        1     0.00     0.00  initIncludeCommand
+  0.00     41.75     0.00        1     0.00     0.00  initVertex
+  0.00     41.75     0.00        1     0.00     0.00  insertNullToAdjList
+  0.00     41.75     0.00        1     0.00     0.01  loadNodeData
+  0.00     41.75     0.00        1     0.00     0.00  loadNodeSize
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+ 
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this 
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2014 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 0.02% of 41.75 seconds
+
+index % time    self  children    called     name
+                0.00    0.00      24/181983995     main [6]
+                0.10    0.00  582459/181983995     getShadowLen [12]
+                0.10    0.00  582459/181983995     getSunStateWithBuildFromGrid [3]
+               14.97    0.00 86280298/181983995     getPerpendicularDist [5]
+               16.40    0.00 94538755/181983995     serchGlareStateFromBuild [4]
+[1]     75.6   31.57    0.00 181983995         serchRouteGridDijkstra [1]
+                0.00    0.00 3580798/3580799     createGridMap [25]
+                0.00    0.00      13/13          updateElite [38]
+-----------------------------------------------
+                                                 <spontaneous>
+[2]     48.9    0.04   20.38                 getUncom [2]
+                0.99   19.39  194153/194153      getSunStateWithBuildFromGrid [3]
+                0.00    0.00 1062854/1062854     getSunAngle [26]
+                0.00    0.00   51715/51715       getGlare [36]
+-----------------------------------------------
+                0.99   19.39  194153/194153      getUncom [2]
+[3]     48.8    0.99   19.39  194153         getSunStateWithBuildFromGrid [3]
+                2.89   16.40 32978178/32978178     serchGlareStateFromBuild [4]
+                0.10    0.00  582459/181983995     serchRouteGridDijkstra [1]
+-----------------------------------------------
+                2.89   16.40 32978178/32978178     getSunStateWithBuildFromGrid [3]
+[4]     46.2    2.89   16.40 32978178         serchGlareStateFromBuild [4]
+               16.40    0.00 94538755/181983995     serchRouteGridDijkstra [1]
+-----------------------------------------------
+                                                 <spontaneous>
+[5]     40.6    1.99   14.97                 getPerpendicularDist [5]
+               14.97    0.00 86280298/181983995     serchRouteGridDijkstra [1]
+-----------------------------------------------
+                                                 <spontaneous>
+[6]      3.5    0.00    1.48                 main [6]
+                1.47    0.00       1/1           serchRouteDistDijkstra [7]
+                0.00    0.01       1/1           loadNodeData [20]
+                0.00    0.00      24/181983995     serchRouteGridDijkstra [1]
+                0.00    0.00       1/1           initIncludeCommand [47]
+                0.00    0.00       1/1           checkIncludeCommand [40]
+                0.00    0.00       1/1           loadNodeSize [50]
+                0.00    0.00       1/1           checkStartAndGoalNum [41]
+                0.00    0.00       1/1           initVertex [48]
+                0.00    0.00       1/1           getBuildPos [42]
+                0.00    0.00       1/1           getMaxBuildWidth [44]
+                0.00    0.00       1/1           initElite [46]
+                0.00    0.00       1/3580799     createGridMap [25]
+-----------------------------------------------
+                1.47    0.00       1/1           main [6]
+[7]      3.5    1.47    0.00       1         serchRouteDistDijkstra [7]
+                0.00    0.00   62421/62421       getSunStateWithBuild [32]
+-----------------------------------------------
+                                                 <spontaneous>
+[8]      3.5    1.47    0.00                 getRadian [8]
+-----------------------------------------------
+                                                 <spontaneous>
+[9]      1.6    0.68    0.00                 _mcount_private [9]
+-----------------------------------------------
+                                                 <spontaneous>
+[10]     0.7    0.30    0.00                 getDist [10]
+-----------------------------------------------
+                                                 <spontaneous>
+[11]     0.3    0.13    0.00                 solarAngle [11]
+-----------------------------------------------
+                                                 <spontaneous>
+[12]     0.2    0.00    0.10                 getShadowLen [12]
+                0.10    0.00  582459/181983995     serchRouteGridDijkstra [1]
+-----------------------------------------------
+                                                 <spontaneous>
+[13]     0.1    0.05    0.00                 tan [13]
+-----------------------------------------------
+                                                 <spontaneous>
+[14]     0.1    0.04    0.00                 _fentry__ [14]
+-----------------------------------------------
+                                                 <spontaneous>
+[15]     0.1    0.03    0.00                 getEdgeAngle [15]
+-----------------------------------------------
+                                                 <spontaneous>
+[16]     0.0    0.02    0.00                 day_of_year [16]
+-----------------------------------------------
+                                                 <spontaneous>
+[17]     0.0    0.02    0.00                 getMaxPos [17]
+-----------------------------------------------
+                                                 <spontaneous>
+[18]     0.0    0.02    0.00                 sqrt [18]
+-----------------------------------------------
+                0.01    0.00   57862/57862       loadNodeData [20]
+[19]     0.0    0.01    0.00   57862         setVertexData [19]
+                0.00    0.00   35495/57862       adjListMalloc [33]
+                0.00    0.00   22367/22367       copyNode [37]
+-----------------------------------------------
+                0.00    0.01       1/1           main [6]
+[20]     0.0    0.00    0.01       1         loadNodeData [20]
+                0.01    0.00   57862/57862       setVertexData [19]
+                0.00    0.00       1/3           fileOpenCheck [39]
+                0.00    0.00       1/1           insertNullToAdjList [49]
+-----------------------------------------------
+                                                 <spontaneous>
+[21]     0.0    0.01    0.00                 assignBuildToGrid [21]
+                0.00    0.00  150838/260444      getEndPointInXaxis [28]
+                0.00    0.00  150838/150839      copyBuild [31]
+                0.00    0.00       1/1           initBuildGrid [45]
+-----------------------------------------------
+                                                 <spontaneous>
+[22]     0.0    0.01    0.00                 buildMalloc [22]
+-----------------------------------------------
+                                                 <spontaneous>
+[23]     0.0    0.01    0.00                 initQueue [23]
+-----------------------------------------------
+                0.00    0.00       1/3580799     main [6]
+                0.00    0.00 3580798/3580799     serchRouteGridDijkstra [1]
+[25]     0.0    0.00    0.00 3580799         createGridMap [25]
+                0.00    0.00       2/260444      getEndPointInXaxis [28]
+                0.00    0.00       1/1           getEndPointInYaxis [43]
+                0.00    0.00       1/150839      copyBuild [31]
+-----------------------------------------------
+                             2125708             getSunAngle [26]
+                0.00    0.00 1062854/1062854     getUncom [2]
+[26]     0.0    0.00    0.00 1062854+2125708 getSunAngle [26]
+                             2125708             getSunAngle [26]
+-----------------------------------------------
+                0.00    0.00       2/301680      getBuildPos [42]
+                0.00    0.00  301678/301680      loadBuildPosData [130]
+[27]     0.0    0.00    0.00  301680         getDisability_glare [27]
+-----------------------------------------------
+                0.00    0.00       2/260444      createGridMap [25]
+                0.00    0.00  109604/260444      initBuildGrid [45]
+                0.00    0.00  150838/260444      assignBuildToGrid [21]
+[28]     0.0    0.00    0.00  260444         getEndPointInXaxis [28]
+-----------------------------------------------
+                0.00    0.00   51715/206860      getGlare [36]
+                0.00    0.00  155145/206860      get3D_angle [34]
+[29]     0.0    0.00    0.00  206860         getIlluminance [29]
+                0.00    0.00   51715/206860      getRadian [30]
+-----------------------------------------------
+                0.00    0.00   51715/206860      getIlluminance [29]
+                0.00    0.00   51715/206860      getEquivalent_velling_luminance [35]
+                0.00    0.00  103430/206860      get3D_angle [34]
+[30]     0.0    0.00    0.00  206860         getRadian [30]
+-----------------------------------------------
+                0.00    0.00       1/150839      createGridMap [25]
+                0.00    0.00  150838/150839      assignBuildToGrid [21]
+[31]     0.0    0.00    0.00  150839         copyBuild [31]
+-----------------------------------------------
+                0.00    0.00   62421/62421       serchRouteDistDijkstra [7]
+[32]     0.0    0.00    0.00   62421         getSunStateWithBuild [32]
+-----------------------------------------------
+                0.00    0.00   22367/57862       initVertex [48]
+                0.00    0.00   35495/57862       setVertexData [19]
+[33]     0.0    0.00    0.00   57862         adjListMalloc [33]
+-----------------------------------------------
+                0.00    0.00   51715/51715       getGlare [36]
+[34]     0.0    0.00    0.00   51715         get3D_angle [34]
+                0.00    0.00  155145/206860      getIlluminance [29]
+                0.00    0.00  103430/206860      getRadian [30]
+-----------------------------------------------
+                0.00    0.00   51715/51715       getGlare [36]
+[35]     0.0    0.00    0.00   51715         getEquivalent_velling_luminance [35]
+                0.00    0.00   51715/206860      getRadian [30]
+-----------------------------------------------
+                0.00    0.00   51715/51715       getUncom [2]
+[36]     0.0    0.00    0.00   51715         getGlare [36]
+                0.00    0.00   51715/206860      getIlluminance [29]
+                0.00    0.00   51715/51715       get3D_angle [34]
+                0.00    0.00   51715/51715       getEquivalent_velling_luminance [35]
+-----------------------------------------------
+                0.00    0.00   22367/22367       setVertexData [19]
+[37]     0.0    0.00    0.00   22367         copyNode [37]
+-----------------------------------------------
+                0.00    0.00      13/13          serchRouteGridDijkstra [1]
+[38]     0.0    0.00    0.00      13         updateElite [38]
+-----------------------------------------------
+                0.00    0.00       1/3           loadNodeSize [50]
+                0.00    0.00       1/3           loadNodeData [20]
+                0.00    0.00       1/3           loadBuildPosData [130]
+[39]     0.0    0.00    0.00       3         fileOpenCheck [39]
+-----------------------------------------------
+                0.00    0.00       1/1           main [6]
+[40]     0.0    0.00    0.00       1         checkIncludeCommand [40]
+-----------------------------------------------
+                0.00    0.00       1/1           main [6]
+[41]     0.0    0.00    0.00       1         checkStartAndGoalNum [41]
+-----------------------------------------------
+                0.00    0.00       1/1           main [6]
+[42]     0.0    0.00    0.00       1         getBuildPos [42]
+                0.00    0.00       2/301680      getDisability_glare [27]
+-----------------------------------------------
+                0.00    0.00       1/1           createGridMap [25]
+[43]     0.0    0.00    0.00       1         getEndPointInYaxis [43]
+-----------------------------------------------
+                0.00    0.00       1/1           main [6]
+[44]     0.0    0.00    0.00       1         getMaxBuildWidth [44]
+-----------------------------------------------
+                0.00    0.00       1/1           assignBuildToGrid [21]
+[45]     0.0    0.00    0.00       1         initBuildGrid [45]
+                0.00    0.00  109604/260444      getEndPointInXaxis [28]
+-----------------------------------------------
+                0.00    0.00       1/1           main [6]
+[46]     0.0    0.00    0.00       1         initElite [46]
+-----------------------------------------------
+                0.00    0.00       1/1           main [6]
+[47]     0.0    0.00    0.00       1         initIncludeCommand [47]
+-----------------------------------------------
+                0.00    0.00       1/1           main [6]
+[48]     0.0    0.00    0.00       1         initVertex [48]
+                0.00    0.00   22367/57862       adjListMalloc [33]
+-----------------------------------------------
+                0.00    0.00       1/1           loadNodeData [20]
+[49]     0.0    0.00    0.00       1         insertNullToAdjList [49]
+-----------------------------------------------
+                0.00    0.00       1/1           main [6]
+[50]     0.0    0.00    0.00       1         loadNodeSize [50]
+                0.00    0.00       1/3           fileOpenCheck [39]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2014 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+  [14] _fentry__              [15] getEdgeAngle (serchRouteGridDijkstra.c) [46] initElite
+   [9] _mcount_private        [28] getEndPointInXaxis     [47] initIncludeCommand
+  [33] adjListMalloc          [43] getEndPointInYaxis     [23] initQueue (serchRouteGridDijkstra.c)
+  [21] assignBuildToGrid (createGridMap.c) [35] getEquivalent_velling_luminance [48] initVertex
+  [22] buildMalloc (createGridMap.c) [36] getGlare        [49] insertNullToAdjList
+  [40] checkIncludeCommand    [29] getIlluminance         [20] loadNodeData
+  [41] checkStartAndGoalNum   [44] getMaxBuildWidth       [50] loadNodeSize
+  [31] copyBuild              [17] getMaxPos (getSunStateFromGrid.c) [4] serchGlareStateFromBuild
+  [37] copyNode                [5] getPerpendicularDist (getSunStateFromGrid.c) [7] serchRouteDistDijkstra
+  [25] createGridMap          [30] getRadian               [1] serchRouteGridDijkstra
+  [16] day_of_year (getSunAngle.c) [8] getRadian (getSunStateFromGrid.c) [19] setVertexData
+  [39] fileOpenCheck          [26] getSunAngle            [11] solarAngle (getSunAngle.c)
+  [34] get3D_angle            [32] getSunStateWithBuild   [18] sqrt
+  [42] getBuildPos             [3] getSunStateWithBuildFromGrid [13] tan
+  [27] getDisability_glare     [2] getUncom (serchRouteGridDijkstra.c) [38] updateElite
+  [10] getDist (getSunStateFromGrid.c) [45] initBuildGrid

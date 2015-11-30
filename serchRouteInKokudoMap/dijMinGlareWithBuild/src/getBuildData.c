@@ -31,7 +31,7 @@ static struct build_pos_t *loadBuildPosData(void){
 		//’†SˆÊ’u‚ÌŒvZ
 		p->pos.x = (min_pos.x + max_pos.x) / 2;
 		p->pos.y = (min_pos.y + max_pos.y) / 2;
-		p->width = getDist(min_pos, max_pos) / 2;
+		p->width = getDist(min_pos, max_pos) / 2;		
 		
 		old->next = p;
 		old = p;
@@ -57,18 +57,26 @@ static int countBuildSize(struct build_pos_t *head){
 	}
 	return build_size;
 }
-	
-	
 
+/* ’n}“à‚ÌŒš•¨‚©‚çÅ‘å•‚ğZo */
+double getMaxBuildWidth(struct build_pos_t *head){
+	struct build_pos_t *p;
+	double width_max = EMPTY;
+	p = head;
+	p = p->next;
+	while(p != NULL){
+		if(p->width > width_max){
+			width_max = p->width;
+		}
+		p = p->next;
+	}
+	return width_max;
+}
 
 void getBuildPos(struct build_set_t* build_set){
-	//struct build_pos_t *head;
-	//int build_size;
 	
 	build_set->head = loadBuildPosData();
 	build_set->build_size = countBuildSize(build_set->head);
-	//printf("%d\n", build_size);
-	
+
 	return;
 }
-	 

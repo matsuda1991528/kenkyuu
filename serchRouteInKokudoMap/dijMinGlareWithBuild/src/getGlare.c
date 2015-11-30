@@ -25,15 +25,15 @@ double getGlare(struct sun_angle_t sun_angle, double edge_angle){
 	double illuminance; // ‘¾—z–@üÆ“x
 	double angle;
 	double equivalent_velling_luminance;
-	double disability_glare;
+	//double disability_glare;
 	double path_eye_degree; //‹ü‚Æ‘¾—z•ûˆÊ‚Ì‚È‚·Šp(2ŸŒ³)
 	
 	path_eye_degree = sun_angle.azim - edge_angle;
 	illuminance = getIlluminance(sun_angle.elev);
 	angle = get3D_angle(sun_angle.elev, path_eye_degree);
 	equivalent_velling_luminance = getEquivalent_velling_luminance(angle, illuminance);
-	disability_glare = getDisability_glare(equivalent_velling_luminance);
-	return (1 + disability_glare);
+	//disability_glare = getDisability_glare(equivalent_velling_luminance);
+	return 1 + (lambda * equivalent_velling_luminance);
 }
 
 

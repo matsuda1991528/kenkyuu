@@ -1,0 +1,165 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<math.h>
+#include"header.h"
+
+
+static double getRadian(double deg){
+	return deg * M_PI / 180.0f;
+}
+
+/*
+static double getDist(struct xy_coord_t p1, struct xy_coord_t p2){
+	return sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+}
+*/
+
+static double getDistance(double org_x, double org_y, double trg_x, double trg_y){
+	return sqrt((trg_x - org_x) * (trg_x - org_x) + (trg_y - org_y) * (trg_y - org_y));
+}
+
+
+/* 
+太陽と観測地を結ぶ直線の式と建物座標の垂線の長さを求める
+y=ax+cの形で求める為，これをax+by+c = 0の形に変換した場合，
+ax-y+c=0となる．これより，
+bは必ず-1となる為，垂線を求める式は予め定数‐1を用いている．
+
+http://www004.upp.so-net.ne.jp/s_honma/urawaza/distance.htm
+ */
+static double getPerpendicularDist(double azimuth, struct xy_coord_t observe_pos, struct xy_coord_t build_pos){
+	double slope;  //傾き
+	double intercept;  //切片
+	
+	slope = tan(getRadian(azimuth)); //太陽と観測地点間を通る直線の傾きを求める．
+	intercept = observe_pos.y - observe_pos.x * slope; //太陽と観測地点間を通る直線の切片を求める．	
+	return abs(build_pos.y - slope * build_pos.x - intercept) / sqrt(slope * slope + 1);
+	//intercept = observe_pos.y + observe_pos.x * slope;
+	//return abs(slope * build_pos.x - build_pos.y + intercept) / sqrt(slope * slope + 1);
+	
+}
+
+
+
+/* 2点間の距離を求める */
+static double getDist(struct xy_coord_t origin_pos, struct xy_coord_t target_pos){
+	return sqrt((target_pos.x - origin_pos.x) * (target_pos.x - origin_pos.x) + (target_pos.y - origin_pos.y) * (target_pos.y - origin_pos.y));
+}
+
+//影の長さを求める
+static struct xy_coord_t getShadowLen(struct sun_angle_t sun_angle, double build_height){
+	double shadow_len;
+	struct xy_coord_t xy_shadow_len;
+	
+	shadow_len = build_height * (1 / tan(getRadian(sun_angle.elev)));
+	xy_shadow_len.y = fabs(shadow_len * sin(getRadian(sun_angle.azim)));
+	xy_shadow_len.x = fabs(shadow_len * cos(getRadian(sun_angle.azim)));
+	
+	return xy_shadow_len;
+}
+
+
+int dtctExstInArea(double bgn_x, double bgn_y, double end_x, double end_y, trg_x, trg_y){
+	if(bgn_x <= trg_x && trg_x <= end_x && bgn_y <= trg_y && trg_y <= end_y)
+		return TRUE;
+	else
+		return FALSE;
+}
+	
+
+/**
+*各グリッドに対する建物によるグレア発生判定処理
+*
+*1. 観測地点と太陽のなす直線の式と建物の位置との垂線の距離を算出する． 
+*2. 建物の幅より垂線の距離が短いならば影の長さを算出する．
+*　if 影の長さが建物との距離より長いならば，太陽は隠れると判断
+*   otherwise 次の建物を参照し，1．へ
+ */
+ int serchGlareStateFromBuild(struct sun_angle_t sun_angle, struct xy_coord_t obs_pos, struct build_pos_t *head){
+	struct build_pos_t *p;
+	double perp_dist; //垂線の長さ
+	double sh_dist; //影の長さ
+	double bu_dist;//観測地‐建物間の距離
+
+	p = head;
+	p = p->next;
+	while(p != NULL){
+		perp_dist = getPerpendicularDist(sun_angle.azim, obs_pos, p->pos); //垂線の長さを求める
+		if(perp_dist >= p->width){
+			sh_dist = (double)BUILD_HIGH * (1 / tan(getRadian(sun_angle.elev)))
+						+ abs(cos(getRadian(sun_angle.azim))) * p->width;  //影の長さを求める
+			bu_dist = getDist(obs_pos, p->pos);  //建物と観測地の距離を求める
+			if(sh_dist >= bu_dist || p->width > bu_dist){  //建物‐観測地間の距離と影の距離を比較
+				return TRUE;
+			}
+		}
+		p = p->next;  //次の建物データを参照する
+	}
+	return FALSE;
+}
+ 
+ /**
+* グリッド地図から建物に対するグレア発生を検出する関数
+*@param sun_angle 太陽の角度
+*@param obs_pos  観測地（自動車の現在地）
+*@param build_grid : グリッド地図データセット
+*@param grid_size : 南北方向と東西方向におけるグリッドのセル数
+*@return グレアを遮蔽したならばTRUE それ以外はFALSE
+ */
+int getSunStateWithBuildFromGrid(struct sun_angle_t sun_angle, struct xy_coord_t obs_pos, struct build_grid_t** build_grid, struct grid_size_t grid_size){
+	int glare_state; //グレア状態 TRUE -> グレアは発生しない	FALSE -> グレア発生
+	struct xy_coord_t sh_end_pos;  //影の先端座標
+	int i, j;
+	
+	//建物の高さに対する影ベクトルとその東西，南北成分の長さを計算する
+	struct xy_coord_t shadow_length = getShadowLen(sun_angle, (double)BUILD_HIGH);
+	
+	/* 自分の位置に届き得る影の最遠の東西方向と南北方向距離を求める． */
+	sh_end_pos.x = obs_pos.x - (shadow_length.x + 2*build_width);
+	//太陽が北側から差し込む場合(日影が南側へ延びる)
+	if(0 < sun_angle.azim && sun_angle.azim < 180){ 
+		sh_end_pos.y = obs_pos.y + (shadow_length.y + 2 * build_width);		
+		//グリッド地図を走査していく．
+		for(i=1;i<grid_size.vertical;i++){
+			for(j=1;j<grid_size.width;j++){
+				//影ベクトルの南北および東西成分に基づき，観測地から影が伸び得るグリッドならば，
+				//グリッド地図内の個々の建物を走査していく．
+				//build_widthが関連するのは，座標は走査対象エリアに位置しないが，
+				//周囲の形状も考慮した時に，走査対象に位置するグリッドも走査する為．
+				if(sh_end_pos.x <= build_grid[i][j].max.x + build_width && build_grid[i][j].min.x - build_width <= obs_pos.x
+				&& sh_end_pos.y - build_width >= build_grid[i][j].min.y - build_width && build_grid[i][j].max.y + build_width >= obs_pos.y){
+					glare_state = serchGlareStateFromBuild(sun_angle, obs_pos, build_grid[i][j].head);
+					if(glare_state == TRUE)
+						return TRUE;
+				}else if(sh_end_pos.x + build_width <= build_grid[i][j].max.x + build_width && build_grid[i][j].min.x - build_width <= obs_pos.x
+				&& sh_end_pos.y  >= build_grid[i][j].min.y - build_width && build_grid[i][j].max.y + build_width >= obs_pos.y){
+					glare_state = serchGlareStateFromBuild(sun_angle, obs_pos, build_grid[i][j].head);
+					if(glare_state == TRUE)
+						return TRUE;
+				}
+				else if(getDistance(build_grid[i][j].max.x, build_grid[i][j].min.y, obs_pos.x, obs_pos.y) <= 2 * build_width){
+					glare_state = serchGlareStateFromBuild(sun_angle, obs_pos, build_grid[i][j].head);
+					if(glare_state == TRUE)
+						return TRUE;
+				}
+			}
+		}	
+	}
+	//太陽が南側から差し込む場合(日影は北側へ延びる)
+	//繰り返し処理以降において，選定範囲の判定式以外は太陽が北側から差し込む場合と同様の為，割愛
+	else{                                                                      
+		sh_end_pos.y = obs_pos.y - (shadow_length.y + 2 * build_width);
+		for(i=1;i<grid_size.vertical;i++){
+			for(j=1;j<grid_size.width;j++){
+				if(sh_end_pos.x <= build_grid[i][j].max.x + build_width &&  build_grid[i][j].min.x - build_width<= obs_pos.x
+				&& sh_end_pos.y <= build_grid[i][j].max.y + build_width && build_grid[i][j].min.y + build_width  <= obs_pos.y){
+					glare_state = serchGlareStateFromBuild(sun_angle, obs_pos, build_grid[i][j].head);
+					if(glare_state == TRUE)
+						return TRUE;
+				}
+			}
+		}
+	}
+	return FALSE;
+}

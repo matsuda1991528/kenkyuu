@@ -21,8 +21,12 @@ my $mon;
 my $year;
 my $wno;
 
-my @grid_x=(20, 50, 100, 200, 500, 1000, 2000);  #x方向のサイズ
-my @grid_y=(20, 50, 100, 200, 500, 1000, 2000); #y方向のサイズ
+my @dp_h = (17); #出発時刻[h]
+my @dp_m = (0); #出発時刻[m]
+my @grid_x=(100);  #x方向のサイズ
+my @grid_y=(5, 10, 20, 50, 100, 200, 500, 1000); #y方向のサイズ
+
+
 my @strlist;   #ファイルの中身（最終更新世代数or適応度）
 
 print "start\n";
@@ -34,12 +38,24 @@ $year+=1900;
 $mon+=1;
 print "$year/$mon/$mday ($wdays[$wno]) $hour:$min:$sec\n";
 
-foreach my $grid_x(@grid_x){	
-	foreach my $grid_y(@grid_y){
-		print "****************\n";
-		print "$grid_x $grid_y\n";
-		$result = system("./go -start 22000 -goal 1 -dptr_h 17 -dptr_m 0 -kph 60 -gx $grid_x -gy $grid_y -gs 0.09"); 	
-		print "****************\n";
+
+
+foreach my $dp_h(@dp_h){
+	foreach my $dp_m(@dp_m){
+		
+		foreach my $grid_x(@grid_x){
+			foreach my $grid_y(@grid_y){
+				($sec,$min,$hour,$mday,$mon,$year,$wno) = localtime(time);
+				my @wdays = ('SUN','MON','TUE','WED','THU','FRI','SAT');
+				$year+=1900;
+				$mon+=1;
+				print "****************\n";
+				print "$year/$mon/$mday ($wdays[$wno]) $hour:$min:$sec\n";
+				print "$grid_x $grid_y\n";
+				$result = system("./go -start 22000 -goal 1 -dptr_h $dp_h -dptr_m $dp_m -kph 60 -gx $grid_x -gy $grid_y -lam 1 -mode 0 >> calc_time_[$dp_h]_[$dp_m]_621_unko.csv"); 	
+				print "****************\n";
+			}
+		}
 	}
 }
 

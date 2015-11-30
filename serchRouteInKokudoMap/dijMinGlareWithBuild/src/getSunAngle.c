@@ -28,9 +28,9 @@ struct sun_angle_t getSunAngle(double time){
 	struct sun_angle_t sun_angle;
 	
 	fact = M_PI / 180; //度数法の角度　×　fact = 弧度法（ラジアン変換）
-	year = 2015;
-	month = 6;
-	day = 21;
+	year = YEAR;
+	month = MONTH;
+	day = DAY;
 	
 	y_day = day_of_year(year, month, day);
 	solarAngle(y_day, time, &sun_angle.elev, &sun_angle.azim);
