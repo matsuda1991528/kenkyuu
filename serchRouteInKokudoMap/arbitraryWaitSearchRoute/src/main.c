@@ -12,7 +12,7 @@ typedef struct input_t{
   int kph; //移動速度(km/h)
   int lambda; //不快さを表すパラメータ
   int rt_mode; //経路探索モード
-  xy_coord_t grd_sz; //建物グリッドサイズ
+  xy_coord_t grd_len; //建物グリッド地図の長さ
 }input_t;
 
 /**
@@ -26,8 +26,8 @@ void initInptData(input_t* inpt){
   inpt->kph = EMPTY;
   inpt->lambda = EMPTY;
   inpt->rt_mode = EMPTY;
-  inpt->grd_sz.y = EMPTY;
-  inpt->grd_sz.x = EMPTY;
+  inpt->grd_len.y = EMPTY;
+  inpt->grd_len.x = EMPTY;
   return;
 }
 
@@ -53,10 +53,10 @@ void setInptData(int argc, char **argv, input_t* inpt){
 			inpt->kph = atoi(*++argv);
 		}
 		else if(strcmp(*argv, "-gx") == 0){
-			inpt->grd_sz.x = atof(*++argv);
+			inpt->grd_len.x = atof(*++argv);
 		}
 		else if(strcmp(*argv, "-gy") == 0){
-			inpt->grd_sz.y = atof(*++argv);
+			inpt->grd_len.y = atof(*++argv);
 		}
 		else if(strcmp(*argv, "-lam") == 0){
 			inpt->lambda = atoi(*++argv);
@@ -75,15 +75,23 @@ int main(int argc, char **argv) {
   input_t inpt;
   initInptData(&inpt);
   setInptData(argc, argv, &inpt);
+  lmbd = inpt.lambda;
 
 /* 入力ファイルから交差点データセットと建物データセットを読み込む */
   vertex_set_t vrtx_st;
   build_set_t bld_st;
   setInptFilesData(&vrtx_st, &bld_st);
-/* グリッド地図を生成する */
-  build_grid_t **bld_grd;
-  bld_grd = cretGrdMap(bld_st, inpt.grd_sz);
 
+/* グリッド地図を生成する */
+  grid_size_t grd_cell_sz;
+  build_grid_t **bld_grd;
+  bld_grd = cretGrdMap(bld_st, inpt.grd_len, &grd_cell_sz);
+
+  /* 時間拡大ネットワークを生成する． */
+  cretTimExpdNtwk(vrtx_st, bld_grd, inpt.grd_len, grd_cell_sz, inpt.kph);
+
+  /* 経路を探索する */
+  srchRoute(vrtx_st, inpt.dptr_vrtx, inpt.arrv_vrtx, inpt.dptr_h, inpt.dptr_m);
 
   return 0;
 }
