@@ -49,8 +49,14 @@ static double getEdgeTrvTim(int kph, xy_coord_t orgn_pos, xy_coord_t dst_pos){
   return dist / mps;
 }
 
+/**
+*移動コストの最大値を保存する
+*@param *cost これまでの移動コストの最大値が格納されているアドレスを指すポインタ
+*@param trgt_cost 新しく取得した移動コスト
+*/
 static void setMaxCost(double *cost, double trgt_cost){
   *cost = MAX(*cost, trgt_cost);
+  return;
 }
 
 /**
@@ -184,7 +190,7 @@ void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
     while(NULL != vrtx_st.indx[i].ptr){
       initVrtxTimSpce(vrtx_st.indx[i].ptr);
       dst_pos = vrtx_st.indx[vrtx_st.indx[i].ptr->num].pos;
-      edge_trvt = getEdgeTrvTim(kph, orgn_pos, dst_pos);
+      tmp_cost = edge_trvt = getEdgeTrvTim(kph, orgn_pos, dst_pos);
 
       /* 時間を進めていく． */
       for(tim.hour=17;tim.hour<20;tim.hour++){
@@ -196,6 +202,8 @@ void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
 
           /* 時刻timに頂点orgn_posにおいて，頂点dst_posを向いた時のグレア発生の有無を調べる． */
           curr_glr_stat = fndGlrOccred(sun, orgn_pos, dst_pos, bld_grd, grd_len, grd_cell_sz);
+          /* もし，グレアが発生するならば，その時の移動コストを計算し， */
+          /* 同一の時間空間内で最大ならば，保存する． */
           if(TRUE == curr_glr_stat){
             curr_glr_val = getGlrVal(sun, orgn_pos, dst_pos);
             tmp_cost = curr_glr_val * edge_trvt;
