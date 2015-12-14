@@ -67,23 +67,6 @@ dij_adj_list_t *dijAdjListMalloc(void){
 	return (dij_adj_list_t *)malloc(sizeof(dij_adj_list_t));
 }
 
-/*
-static void printDijVertex(dij_vertex_t* vrtx, int vrtx_sz){
-	int i;
-	for(i=1;i<vrtx_sz;i++){
-		//printf("%5d %lf %lf |", vrtx[i].node.num, vrtx[i].node.pos.x, vrtx[i].node.pos.y);
-		fprintf(stdout,"|%5d| -> ", vrtx[i].num);
-		vrtx[i].ptr = vrtx[i].head;
-		while(vrtx[i].ptr != NULL){
-			fprintf(stdout,"|%d|", vrtx[i].ptr->num);
-			vrtx[i].ptr = vrtx[i].ptr->next;
-		}
-		fprintf(stdout,"\n");
-	}
-	return;
-}
-*/
-
 static void cpyVrtxAdjList(vertex_t *orgn, dij_vertex_t *dst, int vrtx_sz){
   int indx = 1;
   while(indx < vrtx_sz){
@@ -99,6 +82,7 @@ static void cpyVrtxAdjList(vertex_t *orgn, dij_vertex_t *dst, int vrtx_sz){
       while(NULL != orgn[indx].ptr){
         dst[indx].ptr->num = orgn[indx].ptr->num;
 				dst[indx].ptr->edge_trvt = orgn[indx].ptr->edge_trvt;
+				//dst[indx].ptr->edge_trvt = 60.0f; //debug用
         orgn[indx].ptr = orgn[indx].ptr->next;
         dst[indx].old->next = dst[indx].ptr;
         dst[indx].old = dst[indx].ptr;
@@ -121,6 +105,12 @@ static dij_time_space_list_t *dijTimSpcLstMalloc(void){
   return (dij_time_space_list_t *)malloc(sizeof(dij_time_space_list_t));
 }
 
+/**
+*時刻を表す構造体の各メンバをコピーする．
+*@param orgn コピー元の時刻
+*@param *dst コピー先の時刻
+*@return none
+*/
 static void cpyTim(tim_t orgn, tim_t *dst){
   dst->hour = orgn.hour;
   dst->min = orgn.min;
@@ -145,9 +135,14 @@ static void printDijVertexTimSpce(dij_vertex_t* vrtx, int vrtx_sz){
 				fprintf(stdout, "rout_cost = %f\t", tmp_vrtx.ptr->t_ptr->rout_cost);
 				fprintf(stdout, "arrv_tim:%d:%d:%f\t", tmp_vrtx.ptr->t_ptr->arrv_tim.hour, tmp_vrtx.ptr->t_ptr->arrv_tim.min, tmp_vrtx.ptr->t_ptr->arrv_tim.sec);
 				if(TRUE == tmp_vrtx.ptr->t_ptr->srch_stat)
-					fprintf(stdout, "srch state:TRUE\n");
+					fprintf(stdout, "srch state:TRUE\t");
 				else
-					fprintf(stdout, "srch state:FALSE\n");
+					fprintf(stdout, "srch state:FALSE\t");
+				fprintf(stdout, "prev: %d->%d  %d:%d:%f-> %d:%d:%f\n",
+				tmp_vrtx.ptr->t_ptr->prev.orgn_num, tmp_vrtx.ptr->t_ptr->prev.dst_num,
+				tmp_vrtx.ptr->t_ptr->prev.bgn.hour, tmp_vrtx.ptr->t_ptr->prev.bgn.min,
+				tmp_vrtx.ptr->t_ptr->prev.bgn.sec, tmp_vrtx.ptr->t_ptr->prev.end.hour,
+				tmp_vrtx.ptr->t_ptr->prev.end.min, tmp_vrtx.ptr->t_ptr->prev.end.sec);
 
 
 				tmp_vrtx.ptr->t_ptr = tmp_vrtx.ptr->t_ptr->next;
@@ -190,10 +185,6 @@ static void cpyVrtxTimSpceList(vertex_t *orgn, dij_vertex_t *dst, int vrtx_sz){
 	}
 	indx = 1;
 	while(indx < vrtx_sz){
-		// while(NULL != dst[indx].ptr){
-		// 	dst[indx].ptr->t_ptr = dst[indx].ptr->t_head;
-		// 	dst[indx].ptr = dst[indx].ptr->next;
-		// }
 		dst[indx].ptr = dst[indx].head;
 		indx++;
 	}
@@ -235,12 +226,19 @@ static dij_vertex_t *cpyVrtx(vertex_set_t orgn_vrtx_st, dij_vertex_t *trgt_vrtx,
     fprintf(stderr, "cannnot malloc dij_vertex_t memory\n");
     exit(1);
   }
-
   cpyVrtxIndxAndPos(orgn_vrtx_st.indx, trgt_vrtx, *trgt_vrtx_sz);
   cpyVrtxAdjList(orgn_vrtx_st.indx, trgt_vrtx, *trgt_vrtx_sz);
   cpyVrtxTimSpceList(orgn_vrtx_st.indx, trgt_vrtx, *trgt_vrtx_sz);
 
 	return trgt_vrtx;
+}
+
+static void initTim(tim_t *trgt){
+	trgt->hour = EMPTY;
+	trgt->min = EMPTY;
+	trgt->sec = EMPTY;
+
+	return;
 }
 
 /**
@@ -259,12 +257,9 @@ void initDijVrtx(dij_vertex_t *vrtx, int vrtx_sz){
 				vrtx[i].ptr->t_ptr->rout_cost = EMPTY;
 				vrtx[i].ptr->t_ptr->srch_stat = FALSE;
 				vrtx[i].ptr->t_ptr->prev.orgn_num = EMPTY;
-				vrtx[i].ptr->t_ptr->prev.bgn.hour = EMPTY;
-				vrtx[i].ptr->t_ptr->prev.bgn.min = EMPTY;
-				vrtx[i].ptr->t_ptr->prev.end.hour = EMPTY;
-				vrtx[i].ptr->t_ptr->prev.end.min = EMPTY;
-				vrtx[i].ptr->t_ptr->arrv_tim.hour = EMPTY;
-				vrtx[i].ptr->t_ptr->arrv_tim.min = EMPTY;
+				initTim(&vrtx[i].ptr->t_ptr->prev.bgn);
+				initTim(&vrtx[i].ptr->t_ptr->prev.end);
+				initTim(&vrtx[i].ptr->t_ptr->arrv_tim);
 
 				vrtx[i].ptr->t_ptr = vrtx[i].ptr->t_ptr->next;
 			}
@@ -278,6 +273,9 @@ void initDijVrtx(dij_vertex_t *vrtx, int vrtx_sz){
 
 /**
 *時刻trgtが時刻bgnから時刻endの間であるかを判定する．
+*@param trgt 判定対象時刻
+*@param bgn 始端時刻
+*@param end 始端時刻
 */
 static int existTimSpac(tim_t trgt, tim_t bgn, tim_t end){
 	int trgt_min = trgt.hour * 60 + trgt.min;
@@ -380,11 +378,9 @@ static void swtchSrchStatFrmFalse2True(tim_expd_edge_t trgt, dij_adj_list_t *edg
 /* 出発地から最もコストの少ない頂点を探索し， */
 /* その頂点を探索対象頂点とする． */
 static void findTrgtVrtx(tim_expd_edge_t *trgt, dij_vertex_t *vrtx, int vrtx_sz){
-	//dij_adj_list_t edge;
 	dij_vertex_t tmp_vrtx;
 	int i;
 	double min_cost = EMPTY;
-	static int counter = 1;
 	/* 各頂点に対する繰り返し */
 	for(i=1;i<vrtx_sz;i++){
 		/* 各頂点iに(2次元の概念において)隣接する頂点を走査していく． */
@@ -416,7 +412,6 @@ static void findTrgtVrtx(tim_expd_edge_t *trgt, dij_vertex_t *vrtx, int vrtx_sz)
 		fprintf(stderr, "%d are not connected graph\n", trgt->orgn_num);
 		exit(1);
 	}
-	counter++;
 	return;
 }
 
@@ -466,11 +461,19 @@ static int condiUpdtRoutCost(double befr_cost, double aftr_cost){
 
 /* キューにおけるコスト，到達時刻，通過頂点を保存する． */
 static void updatPathQue(dij_adj_list_t *edge, tim_expd_edge_t trgt, double wait_sec){
+	fprintf(stdout, "update edge : %d -> %d\t", trgt.dst_num, edge->num);
+	fprintf(stdout, "bgn %d:%d:%f  end %d:%d:%f  before cost %f\n", edge->t_ptr->bgn_tim.hour,
+	edge->t_ptr->bgn_tim.min, edge->t_ptr->bgn_tim.sec, edge->t_ptr->end_tim.hour,
+	edge->t_ptr->end_tim.min, edge->t_ptr->end_tim.sec, edge->t_ptr->rout_cost);
+
 	edge->t_ptr->rout_cost = trgt.rout_cost + edge->t_ptr->edge_cost + wait_sec;
+
+	fprintf(stdout, "%f = %f + %f + %f\n", edge->t_ptr->rout_cost, trgt.rout_cost, edge->t_ptr->edge_cost, wait_sec);
 	cpyTim(trgt.curr, &edge->t_ptr->arrv_tim);
 	edge->t_ptr->arrv_tim.sec += edge->edge_trvt + wait_sec;
 	fixTimFormat(&edge->t_ptr->arrv_tim);
 	edge->t_ptr->prev.orgn_num = trgt.orgn_num;
+	edge->t_ptr->prev.dst_num = trgt.dst_num;
 	cpyTim(trgt.bgn, &edge->t_ptr->prev.bgn);
 	cpyTim(trgt.end, &edge->t_ptr->prev.end);
 	cpyTim(trgt.curr, &edge->t_ptr->prev.curr);
@@ -478,6 +481,33 @@ static void updatPathQue(dij_adj_list_t *edge, tim_expd_edge_t trgt, double wait
 	return;
 }
 
+static void printOptmPath(tim_expd_edge_t prev, dij_vertex_t *vrtx){
+dij_vertex_t tmp_vrtx;
+	while(EMPTY != prev.orgn_num){
+
+		fprintf(stdout, "%d <- %d time %d:%d:%g<--%d:%d:%g\n",prev.dst_num,
+		prev.orgn_num, prev.end.hour, prev.end.min, prev.end.sec,
+		prev.bgn.hour, prev.bgn.min, prev.bgn.sec);
+		/* 直前に通過した辺の始端点が終端点となる辺に対する繰り返し */
+		tmp_vrtx.ptr = vrtx[prev.orgn_num].head;
+		while(NULL != tmp_vrtx.ptr){
+			if(tmp_vrtx.ptr->num == prev.dst_num){
+				tmp_vrtx.ptr->t_ptr = tmp_vrtx.ptr->t_head;
+				while(NULL != tmp_vrtx.ptr->t_ptr){
+					if(TRUE == existTimSpac(prev.bgn, tmp_vrtx.ptr->t_ptr->bgn_tim,
+					tmp_vrtx.ptr->t_ptr->end_tim)){
+						prev = tmp_vrtx.ptr->t_ptr->prev;
+						if(EMPTY == prev.orgn_num)
+							break;
+					}
+					tmp_vrtx.ptr->t_ptr = tmp_vrtx.ptr->t_ptr->next;
+				}
+			}
+			tmp_vrtx.ptr = tmp_vrtx.ptr->next;
+		}
+	}
+	return;
+}
 
 /* ダイクストラ法による経路探索を行う． */
 void Dijkstra(vertex_set_t vrtx_st, int dptr_num, int arrv_num, tim_t dptr){
@@ -488,18 +518,22 @@ void Dijkstra(vertex_set_t vrtx_st, int dptr_num, int arrv_num, tim_t dptr){
 	initDijVrtx(vrtx, vrtx_sz);
 	initDptrVrtx(vrtx[dptr_num].ptr, dptr);
 
-	tim_expd_edge_t trgt;
+	tim_expd_edge_t trgt, prev;
 	initTrgtVrtx(&trgt);
 	while(1){
 		/* 出発地から最もコストの少ない辺を探索し， それを探索対象辺とする．*/
 		findTrgtVrtx(&trgt, vrtx, vrtx_sz);
 		exceptTrgtVrtx(&trgt, dptr_num, dptr);
 		/* 目的地が始端である辺が探索対象辺であるならな，アルゴリズム終了 */
-		if(trgt.orgn_num == arrv_num)
-			break;
+
 		/* 出発点からの最小コストを持つ辺を未探索状態から探索済状態にする */
 		swtchSrchStatFrmFalse2True(trgt, vrtx[trgt.orgn_num].head);
-		
+		if(trgt.dst_num == arrv_num)
+			break;
+		fprintf(stdout, "%d->%d tim %d:%d:%f -> %d:%d:%f cost %f\n", trgt.orgn_num,
+		trgt.dst_num, trgt.bgn.hour, trgt.bgn.min, trgt.bgn.sec,
+		trgt.end.hour, trgt.end.min, trgt.end.sec, trgt.rout_cost);
+
 		/* 最小コストを持つ辺の終端頂点から伸びる辺に対する繰り返し */
 		vrtx[trgt.dst_num].ptr = vrtx[trgt.dst_num].head;
 		while(NULL != vrtx[trgt.dst_num].ptr){
@@ -518,8 +552,11 @@ void Dijkstra(vertex_set_t vrtx_st, int dptr_num, int arrv_num, tim_t dptr){
 					wait_cost = wait_sec;
 					/* 現在の到達コストのより更にコストの低い経路を見つけたならば，到達コストを更新する*/
 					if(TRUE == condiUpdtRoutCost(vrtx[trgt.dst_num].ptr->t_ptr->rout_cost,
-					trgt.rout_cost + wait_cost))
+					trgt.rout_cost + vrtx[trgt.dst_num].ptr->t_ptr->edge_cost + wait_cost)){
+						//fprintf(stdout, "%f + %f + %f ", vrtx[trgt.dst_num].ptr->t_ptr->rout_cost, vrtx[trgt.dst_num].ptr->t_ptr->edge_cost, wait_cost);
 						updatPathQue(vrtx[trgt.dst_num].ptr, trgt, wait_cost);
+						//fprintf(stdout, "= %f\n", vrtx[trgt.dst_num].ptr->t_ptr->rout_cost);
+					}
 				}
 				vrtx[trgt.dst_num].ptr->t_ptr = vrtx[trgt.dst_num].ptr->t_ptr->next;
 			}
@@ -527,9 +564,11 @@ void Dijkstra(vertex_set_t vrtx_st, int dptr_num, int arrv_num, tim_t dptr){
 		}
 		fprintf(stdout, "***************************************************\n");
 		printDijVertexTimSpce(vrtx, vrtx_sz);
-		fprintf(stdout, "***************************************************\n\n\n");
-		fprintf(stdout, "%f\n", trgt.rout_cost);
+		fprintf(stdout, "***************************************************\n");
 	}
+	fprintf(stdout,"\n\n");
+	fprintf(stdout, "The following are optimum path from orign vertex to distination vertex\n");
+	printOptmPath(trgt, vrtx);
   return;
 }
 
