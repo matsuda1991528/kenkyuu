@@ -22,6 +22,30 @@ typedef struct sun_angle_t{
 
 /**
 **********************
+*  経路探索用のデータ   *
+**********************
+**/
+/* 経路探索において，直前に通過した頂点を表す構造体 */
+typedef struct tim_expd_edge_t{
+	int orgn_num;
+	int dst_num;
+	tim_t bgn; //辺が持つ時間空間の始端時刻
+	tim_t end; //辺が持つ時間空間の終端時刻
+	tim_t curr; //頂点への到達時刻
+	double rout_cost; //頂点への到達コスト
+}tim_expd_edge_t;
+
+/* ダイクストラ法による経路探索用のメタデータ */
+typedef struct dij_find_path_t{
+	double path_cost;
+	int find_state;
+	tim_expd_edge_t prev;
+	tim_t arrv_tim;
+}dij_find_path_t;
+
+
+/**
+**********************
 *   交差点関係のデータ     *
 **********************
 **/
@@ -29,7 +53,8 @@ typedef struct sun_angle_t{
 typedef struct time_space_list_t{
 	tim_t bgn_tim; //時間空間Sへ遷移できる始端時刻
 	tim_t end_tim; //時間空間Sへ遷移できる終端時刻
-	double cost;
+	double edge_cost;
+	dij_find_path_t dij_meta;
 	struct time_space_list_t *next;
 }time_space_list_t;
 
