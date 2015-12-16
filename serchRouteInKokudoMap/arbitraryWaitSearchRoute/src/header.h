@@ -1,97 +1,112 @@
 #ifndef HEADER_H
 #define HEADER_H
 
-/* xyÀ•W‚ğ•\Œ»‚·‚é\‘¢‘Ì */
+/* xyåº§æ¨™ã‚’è¡¨ç¾ã™ã‚‹æ§‹é€ ä½“ */
 typedef struct xy_coord_t{
-	double x;  //xÀ•W
-	double y;  //yÀ•W
+	double x;  //xï¿½ï¿½ï¿½W
+	double y;  //yï¿½ï¿½ï¿½W
 }xy_coord_t;
 
-/* ‚ğ•\‚·\‘¢‘Ì */
+/* æ™‚åˆ»ã‚’è¡¨ã™æ§‹é€ ä½“ */
 typedef struct tim_t{
 	int hour;
 	int min;
-	int sec;
+	double sec;
 }tim_t;
 
-/* ‘¾—zŠp“x‚ğ•\‚·\‘¢‘Ì */
+/* å¤ªé™½è§’åº¦ã‚’è¡¨ã™æ§‹é€ ä½“ */
 typedef struct sun_angle_t{
-	double elev;   //‚“x
-	double azim;  //•ûˆÊ
+	double elev;   //é«˜åº¦
+	double azim;  //æ–¹ä½
 }sun_angle_t;
 
 /**
 **********************
-*   Œğ·“_ŠÖŒW‚Ìƒf[ƒ^     *
+*   äº¤å·®ç‚¹é–¢ä¿‚ã®ãƒ‡ãƒ¼ã‚¿     *
 **********************
 **/
-/* ŠÔ‹óŠÔ‚ğ•\‚·\‘¢‘Ì */
-typedef struct time_space_t{
-	tim_t bgn_tim; //ŠÔ‹óŠÔS‚Ö‘JˆÚo—ˆ‚éÅ‚à‘‚¢
-	tim_t end_tim; //ŠÔ‹óŠÔS‚Ö‘JˆÚo—ˆ‚éÅ‚à’x‚¢
+/* æ™‚é–“ç©ºé–“ã‚’è¡¨ã™æ§‹é€ ä½“ */
+typedef struct time_space_list_t{
+	tim_t bgn_tim; //æ™‚é–“ç©ºé–“Sã¸é·ç§»ã§ãã‚‹å§‹ç«¯æ™‚åˆ»
+	tim_t end_tim; //æ™‚é–“ç©ºé–“Sã¸é·ç§»ã§ãã‚‹çµ‚ç«¯æ™‚åˆ»
 	double cost;
-}time_space_t;
+	struct time_space_list_t *next;
+}time_space_list_t;
 
 
-/* —×ÚƒŠƒXƒg‚ğ•\‚·\‘¢‘Ì */
+/* éš£æ¥ãƒªã‚¹ãƒˆã‚’è¡¨ã™æ§‹é€ ä½“ */
 typedef struct adj_list_t{
 	int num;
-	time_space_t *tim_spc; //ŠÔˆË‘¶¼“úƒOƒŒƒAó‘Ô
+	double edge_trvt;
+	time_space_list_t *t_head; //æ™‚é–“ä¾å­˜ã‚°ãƒ¬ã‚¢çŠ¶æ…‹
+	time_space_list_t *t_ptr;
+	time_space_list_t *t_old;
 	struct adj_list_t *next;
 }adj_list_t;
 
 
-/* ’¸“_ƒŠƒXƒg‚ğ•\Œ»‚·‚é\‘¢‘Ì */
+/* é ‚ç‚¹ãƒªã‚¹ãƒˆã‚’è¡¨ã™æ§‹é€ ä½“*/
 typedef struct vertex_t{
-	int num; //ƒCƒ“ƒfƒbƒNƒX”Ô†
-	xy_coord_t pos; //2ŸŒ³ƒ†[ƒNƒŠƒbƒh‹óŠÔ‚É‚¨‚¯‚éˆÊ’uÀ•W
+	int num; //ç´¢å¼•ç•ªå·
+	xy_coord_t pos; //2æ¬¡å…ƒãƒ¦ãƒ¼ã‚¯ãƒªãƒƒãƒ‰ç©ºé–“ã«ãŠã‘ã‚‹ä½ç½®åº§æ¨™
 	adj_list_t *ptr;
 	adj_list_t *head;
 	adj_list_t *old;
 }vertex_t;
 
 typedef struct vertex_set_t{
-	int sz; //’¸“_‚Ì‘”
-	vertex_t *indx; //’n}ã‚ÌŒğ·“_‚Ì‘”i”z—ñ‚ÌéŒ¾‚Å’è‹`‚·‚×‚«ƒTƒCƒYj
+	int sz; //é ‚ç‚¹ã®ç·æ•°
+	vertex_t *indx; //åœ°å›³ä¸Šã®äº¤å·®ç‚¹ã®ç·æ•°(é…åˆ—ã®å®£è¨€ã§å®šç¾©ã™ã¹ãã‚µã‚¤ã‚º)
 }vertex_set_t;
 
 /**
 **********************
-*     Œš•¨ŠÖŒW‚Ìƒf[ƒ^      *
+*  å»ºç‰©é–¢ä¿‚ã®ãƒ‡ãƒ¼ã‚¿      *
 **********************
 **/
 
-/* Œš•¨‚ğ•\‚·\‘¢‘Ì */
+/* å»ºç‰©ã‚’è¡¨ã™æ§‹é€ ä½“ */
 typedef struct build_pos_t{
-	int num;       //Œš•¨”Ô†
-	double wdth; //Œš•¨•
-	xy_coord_t pos; //Œš•¨‚Ì’†SˆÊ’u
+	int num;       //å»ºç‰©ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·
+	double wdth; //å»ºç‰©å¹…
+	xy_coord_t pos; //å»ºç‰©ã®ä¸­å¿ƒä½ç½®
 	struct build_pos_t *next;
 }build_pos_t;
 
 typedef struct build_set_t{
-	build_pos_t *head; //æ“ªƒŠƒXƒg‚Íƒ_ƒ~[
+	build_pos_t *head; //å…ˆé ­ãƒªã‚¹ãƒˆã¯ãƒ€ãƒŸãƒ¼
 	build_pos_t *ptr;
 	build_pos_t *old;
-	int sz; //’n}ã‚ÌŒš•¨‚Ì‘”i”z—ñ‚ÌéŒ¾‚Å’è‹`‚·‚×‚«ƒTƒCƒYj
+	int sz; //åœ°å›³ä¸Šã®å»ºç‰©ã®ç·æ•°(é…åˆ—ã®å®£è¨€ã§å®šç¾©ã™ã¹ãã‚µã‚¤ã‚º)
 }build_set_t;
 
 typedef struct grid_size_t{
-	int sn; //“ì–k•ûŒü‚É‚¨‚¯‚éƒOƒŠƒbƒhƒTƒCƒY
-	int ew; //“Œ¼•ûŒü‚É‚¨‚¯‚éƒOƒŠƒbƒhƒTƒCƒY
+	int sn; //å—åŒ—æ–¹å‘ã«ãŠã‘ã‚‹ã‚°ãƒªãƒƒãƒ‰ã‚µã‚¤ã‚º
+	int ew; //æ±è¥¿æ–¹å‘ã«ãŠã‘ã‚‹ã‚°ãƒªãƒƒãƒ‰ã‚µã‚¤ã‚º
 }grid_size_t;
 
-/* Œš•¨ƒf[ƒ^ƒOƒŠƒbƒhƒ}ƒbƒv‚ğ•\‚·\‘¢‘Ì */
+/* å»ºç‰©ãƒ‡ãƒ¼ã‚¿ã‚°ãƒªãƒƒãƒ‰ãƒãƒƒãƒ—ã‚’è¡¨ã™æ§‹é€ ä½“ */
 typedef struct build_grid_t{
-	xy_coord_t bgn;  //ƒOƒŠƒbƒh’n}‚Ìn’[(Å¬)xyÀ•W
-	xy_coord_t end; //ƒOƒŠƒbƒh’n}‚ÌI’[(Å‘å)xyÀ•W
-	build_pos_t *head;  //Œš•¨ƒŠƒXƒg  //æ“ªƒŠƒXƒg‚Íƒ_ƒ~[
+	xy_coord_t bgn;  //ã‚°ãƒªãƒƒãƒ‰åœ°å›³ã®å§‹ç«¯(æœ€å°)xyåº§æ¨™
+	xy_coord_t end; //ã‚°ãƒªãƒƒãƒ‰åœ°å›³ã®çµ‚ç«¯(æœ€å¤§)xyåº§æ¨™
+	build_pos_t *head;  //å»ºç‰©ãƒªã‚¹ãƒˆ(å…ˆé ­ãƒªã‚¹ãƒˆã¯ãƒ€ãƒŸãƒ¼)
 	build_pos_t *ptr;
 	build_pos_t *old;
 }build_grid_t;
 
+/**
+**********************
+*   ã‚°ãƒ­ãƒ¼ãƒãƒªãƒ¼å¤‰æ•°  *
+**********************
+**/
+double max_bld_wdth;
+double lmbd;
+
 void setInptFilesData(vertex_set_t *vrtx_st, build_set_t* bld_st);
-//void cretGrdMap(build_grid_t **bld_grd, build_set_t bld_st, xy_coord_t grd_sz);
-build_grid_t **cretGrdMap(build_set_t bld_st, xy_coord_t grd_len);
+build_grid_t **cretGrdMap(build_set_t bld_st, xy_coord_t grd_len,
+	grid_size_t *grd_cell_sz);
+void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
+	xy_coord_t grd_len, grid_size_t grd_cell_sz, double kph);
+void srchRoute(vertex_set_t vrtx_st, int dptr_num, int arrv_num, tim_t dptr);
 
 #endif
