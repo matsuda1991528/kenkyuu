@@ -9,6 +9,7 @@ int fndGlrOccred(sun_angle_t sun, xy_coord_t orgn_pos, xy_coord_t dst_pos,
   build_grid_t **bld_grd, xy_coord_t grd_len, grid_size_t grd_sz);
 double getGlrVal(sun_angle_t sun, xy_coord_t orgn_pos, xy_coord_t dst_pos);
 double getDist(struct xy_coord_t origin_pos, struct xy_coord_t target_pos);
+void dtctFileOpn(FILE **fp, char *fname, char *mode);
 
 /**
 *時間空間リストの記憶領域を取得する．
@@ -30,6 +31,7 @@ static void initVrtxTimSpce(adj_list_t *edge){
   edge->t_old = edge->t_ptr = edge->t_head;
   edge->t_ptr->bgn_tim.hour = 0;
   edge->t_ptr->bgn_tim.min = 0;
+  edge->t_ptr->bgn_tim.sec = 0.0f;
 
   return;
 }
@@ -41,9 +43,9 @@ static void initVrtxTimSpce(adj_list_t *edge){
 *@param dst_pos 移動先の頂点
 *@return 所要時間[sec]
  */
-static double getEdgeTrvTim(int kph, xy_coord_t orgn_pos, xy_coord_t dst_pos){
+static double getEdgeTrvSec(double kph, xy_coord_t orgn_pos, xy_coord_t dst_pos){
   /* 時速km/h から 秒速m/secに変換する． */
-  double mps = (double)kph / 3.6f;
+  double mps = kph / 3.6f;
   double dist = getDist(orgn_pos, dst_pos);
 
   return dist / mps;
@@ -66,13 +68,16 @@ static void setMaxCost(double *cost, double trgt_cost){
  *@return none
  */
 static void setTimSpceEndTim(adj_list_t *edge, tim_t tim){
-  if(0 != tim.min){
+  // if(0 != tim.min){
+  //   edge->t_ptr->end_tim.hour = tim.hour;
+  //   edge->t_ptr->end_tim.min = tim.min - 1;
+  // }else{
+  //   edge->t_ptr->end_tim.hour = tim.hour - 1;
+  //   edge->t_ptr->end_tim.min = 59;
+  // }
     edge->t_ptr->end_tim.hour = tim.hour;
-    edge->t_ptr->end_tim.min = tim.min - 1;
-  }else{
-    edge->t_ptr->end_tim.hour = tim.hour - 1;
-    edge->t_ptr->end_tim.min = 59;
-  }
+    edge->t_ptr->end_tim.min = tim.min;
+    edge->t_ptr->end_tim.sec = 0.0f;
   return;
 }
 
@@ -98,6 +103,7 @@ static void appndTimSpceLst(adj_list_t *edge){
 static void setTimSpceBgnTim(adj_list_t *edge, tim_t tim){
   edge->t_ptr->bgn_tim.hour = tim.hour;
   edge->t_ptr->bgn_tim.min = tim.min;
+  edge->t_ptr->bgn_tim.sec = 0.0f;
 
   return;
 }
@@ -138,10 +144,10 @@ int swtchStatFrmNonGlr2Glr(int bfre_glr_stat, int curr_glr_stat){
 *@param cost 辺リストに格納する移動コスト
 *return none
 */
-static void tearoffTimSpcelst(adj_list_t *edge, double cost){
+static void tearoffTimSpcelst(adj_list_t *edge, double edge_trvt){
   edge->t_ptr->end_tim.hour = 23;
   edge->t_ptr->end_tim.min = 59;
-  edge->t_ptr->cost = cost;
+  edge->t_ptr->cost = edge_trvt;
 
   edge->t_old->next = edge->t_ptr;
   edge->t_old = edge->t_ptr;
@@ -155,14 +161,27 @@ static void tearoffTimSpcelst(adj_list_t *edge, double cost){
 *@param *edge 辺リストのアドレスを参照するポインタ
 *@return none
 */
-static void prntAllTimSpce(adj_list_t *edge){
-  edge->t_ptr = edge->t_head;
-  while(NULL != edge->t_ptr){
-    fprintf(stdout, "bgn %d:%d\n", edge->t_ptr->bgn_tim.hour, edge->t_ptr->bgn_tim.min);
-    fprintf(stdout, "\t->cost:%f\n", edge->t_ptr->cost);
-    fprintf(stdout, "end %d:%d\n\n", edge->t_ptr->end_tim.hour, edge->t_ptr->end_tim.min);
+static void printAllEdge(vertex_t *vrtx, int vrtx_sz){
+  FILE *fp;
+  char *fname = "..\\outputfile\\time_expanded_edges.txt";
+  dtctFileOpn(&fp, fname, "wt");
 
-    edge->t_ptr = edge->t_ptr->next;
+  vertex_t tmp_vrtx;
+  int i;
+  for(i=1;i<vrtx_sz;i++){
+    tmp_vrtx.ptr = vrtx[i].head;
+    while(NULL != tmp_vrtx.ptr){
+      fprintf(fp, "\n|%5d| -> |%5d|\t", vrtx[i].num, tmp_vrtx.ptr->num);
+      fprintf(fp, "trv_sec:%f\n", tmp_vrtx.ptr->edge_trvt);
+      tmp_vrtx.ptr->t_ptr = tmp_vrtx.ptr->t_head;
+      while(NULL != tmp_vrtx.ptr->t_ptr){
+        fprintf(fp, "bgn %2d:%2d\t", tmp_vrtx.ptr->t_ptr->bgn_tim.hour, tmp_vrtx.ptr->t_ptr->bgn_tim.min);
+        fprintf(fp, "end %2d:%2d\t", tmp_vrtx.ptr->t_ptr->end_tim.hour, tmp_vrtx.ptr->t_ptr->end_tim.min);
+        fprintf(fp, "cost:%f\n", tmp_vrtx.ptr->t_ptr->cost);
+        tmp_vrtx.ptr->t_ptr = tmp_vrtx.ptr->t_ptr->next;
+      }
+      tmp_vrtx.ptr = tmp_vrtx.ptr->next;
+    }
   }
   return;
 }
@@ -173,24 +192,26 @@ static void prntAllTimSpce(adj_list_t *edge){
 *@param **bld_grd 建物を示す頂点セット(各頂点はグリッド単位で小分けに管理されている)
 */
 void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
-  xy_coord_t grd_len, grid_size_t grd_cell_sz, int kph){
+  xy_coord_t grd_len, grid_size_t grd_cell_sz, double kph){
   int i;
   tim_t tim;
   xy_coord_t orgn_pos, dst_pos;
   int curr_glr_stat, bfre_glr_stat;
   double tim_h, curr_glr_val, edge_trvt, tmp_cost;
   sun_angle_t sun;
-
+  /* 各頂点に対する繰り返し */
   for(i=1;i<vrtx_st.sz;i++){
-    curr_glr_stat = bfre_glr_stat = FALSE;
     vrtx_st.indx[i].ptr = vrtx_st.indx[i].head;
     orgn_pos = vrtx_st.indx[i].pos;
 
     /* 頂点orgn_posとの辺を持つ頂点に対する繰り返し */
     while(NULL != vrtx_st.indx[i].ptr){
+      curr_glr_stat = bfre_glr_stat = FALSE;
       initVrtxTimSpce(vrtx_st.indx[i].ptr);
       dst_pos = vrtx_st.indx[vrtx_st.indx[i].ptr->num].pos;
-      tmp_cost = edge_trvt = getEdgeTrvTim(kph, orgn_pos, dst_pos);
+      /* 辺の移動における所要時間[sec]を求める． */
+      tmp_cost = edge_trvt = getEdgeTrvSec(kph, orgn_pos, dst_pos);
+      vrtx_st.indx[i].ptr->edge_trvt = edge_trvt;
 
       /* 時間を進めていく． */
       for(tim.hour=17;tim.hour<20;tim.hour++){
@@ -199,7 +220,6 @@ void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
           tim_h = (double)tim.hour + (double)tim.min / 60.0f;
           /* 時刻timにおける太陽の角度を算出する． */
           sun = getSunAngle(tim_h);
-
           /* 時刻timに頂点orgn_posにおいて，頂点dst_posを向いた時のグレア発生の有無を調べる． */
           curr_glr_stat = fndGlrOccred(sun, orgn_pos, dst_pos, bld_grd, grd_len, grd_cell_sz);
           /* もし，グレアが発生するならば，その時の移動コストを計算し， */
@@ -216,8 +236,6 @@ void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
             setTimSpceEndTim(vrtx_st.indx[i].ptr, tim);
             appndTimSpceLst(vrtx_st.indx[i].ptr);
             setTimSpceBgnTim(vrtx_st.indx[i].ptr, tim);
-            if(sun.elev < 0.0f)
-              break;
           }
           /* グレア未発生状態からグレア状態に切り替わったならば， */
           /* 終端時刻の格納と，時間空間リストを末尾に追加する */
@@ -228,23 +246,19 @@ void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
             setTimSpceBgnTim(vrtx_st.indx[i].ptr, tim);
           }
           bfre_glr_stat = curr_glr_stat;
+          if(sun.elev < 0.0f){
+           goto END;
+          }
         }
       }
+      END:
       /*辺の時間空間リストに対する終了処理*/
-      tearoffTimSpcelst(vrtx_st.indx[i].ptr, tmp_cost);
+      tearoffTimSpcelst(vrtx_st.indx[i].ptr, edge_trvt);
       vrtx_st.indx[i].ptr = vrtx_st.indx[i].ptr->next;
     }
   }
-
-  for(i=1;i<vrtx_st.sz;i++){
-    vrtx_st.indx[i].ptr = vrtx_st.indx[i].head;
-    while(NULL != vrtx_st.indx[i].ptr){
-      fprintf(stdout, "*************\n");
-      prntAllTimSpce(vrtx_st.indx[i].ptr);
-      vrtx_st.indx[i].ptr = vrtx_st.indx[i].ptr->next;
-      fprintf(stdout, "*************\n");
-    }
-  }
+  if(TRUE == PRINT_EXPENDED_EDGE)
+    printAllEdge(vrtx_st.indx, vrtx_st.sz);
 
   return;
 }
