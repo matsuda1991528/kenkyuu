@@ -3,8 +3,8 @@
 
 /* xy座標を表現する構造体 */
 typedef struct xy_coord_t{
-	double x;  //x���W
-	double y;  //y���W
+	double x;  //x座標
+	double y;  //y座標
 }xy_coord_t;
 
 /* 時刻を表す構造体 */
