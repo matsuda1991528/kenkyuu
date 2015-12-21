@@ -145,7 +145,7 @@ void initTrgtVrtx(tim_expd_edge_t *trgt){
 	trgt->dst_num = EMPTY;
 	trgt->bgn.hour = trgt->bgn.min = trgt->bgn.sec = EMPTY;
 	trgt->end.hour = trgt->end.min = trgt->end.sec = EMPTY;
-	trgt->curr.hour = trgt->curr.min = trgt->curr.sec = EMPTY;
+	trgt->passed.hour = trgt->passed.min = trgt->passed.sec = EMPTY;
 	trgt->rout_cost =EMPTY;
 
 	return;
@@ -203,7 +203,7 @@ void findTrgtVrtx(tim_expd_edge_t *trgt, vertex_t *vrtx, int vrtx_sz){
 						}
 						cpyTim(tmp_vrtx.ptr->t_ptr->bgn_tim, &trgt->bgn);
 						cpyTim(tmp_vrtx.ptr->t_ptr->end_tim, &trgt->end);
-						cpyTim(tmp_vrtx.ptr->t_ptr->dij_meta.arrv_tim, &trgt->curr);
+						cpyTim(tmp_vrtx.ptr->t_ptr->dij_meta.arrv_tim, &trgt->passed);
 						min_cost = trgt->rout_cost = tmp_vrtx.ptr->t_ptr->dij_meta.path_cost;
 					}
 				}
@@ -224,14 +224,14 @@ void findTrgtVrtx(tim_expd_edge_t *trgt, vertex_t *vrtx, int vrtx_sz){
 *最初の繰り返し時，最小コストを持つ辺は
 EMPTY→dptr_numを結ぶ辺とし，
 出発時刻が属する空間とする．
-また，辺を通過し終わる時刻currには，
+また，辺を通過し終わる時刻passedには，
 出発時刻が格納される．
 */
 void exceptTrgtVrtx(tim_expd_edge_t *trgt, int dptr_num, tim_t dptr){
 	if(trgt->orgn_num == EMPTY){
 		trgt->dst_num = dptr_num;
 		trgt->rout_cost = 0.0f;
-		cpyTim(dptr, &trgt->curr);
+		cpyTim(dptr, &trgt->passed);
     trgt->bgn.hour = trgt->bgn.min = 0;
     trgt->bgn.sec = 0.0f;
     trgt->end.hour = 23;
@@ -275,7 +275,7 @@ static void updatPathQue(adj_list_t *edge, tim_expd_edge_t trgt, double wait_sec
 
   /* 辺の到達時刻の更新．直前に通過した辺を通過し終わる時刻にその辺の所要時間と待ち時間を加算する． */
   /* その後，時刻を60進数に修正する */
-	cpyTim(trgt.curr, &edge->t_ptr->dij_meta.arrv_tim);
+	cpyTim(trgt.passed, &edge->t_ptr->dij_meta.arrv_tim);
   edge->t_ptr->dij_meta.arrv_tim.sec += edge->edge_trvt + wait_sec;
 	fixTimFormat(&edge->t_ptr->dij_meta.arrv_tim);
 
@@ -284,7 +284,7 @@ static void updatPathQue(adj_list_t *edge, tim_expd_edge_t trgt, double wait_sec
 	edge->t_ptr->dij_meta.prev.dst_num = trgt.dst_num;
 	cpyTim(trgt.bgn, &edge->t_ptr->dij_meta.prev.bgn);
 	cpyTim(trgt.end, &edge->t_ptr->dij_meta.prev.end);
-	cpyTim(trgt.curr, &edge->t_ptr->dij_meta.prev.curr);
+	cpyTim(trgt.passed, &edge->t_ptr->dij_meta.prev.passed);
 
 	return;
 }
@@ -308,7 +308,7 @@ int arrv_num, tim_t dptr){
     if(arrv_num != prev.orgn_num){
   		fprintf(path_vrtx_num_fp, "%5d <- %5d time %2d:%2d:%2.0f<--%2d:%2d:%2.0f  arrv %2d:%2d:%2.0f\n",prev.dst_num,
   		prev.orgn_num, prev.end.hour, prev.end.min, prev.end.sec,
-  		prev.bgn.hour, prev.bgn.min, prev.bgn.sec, prev.curr.hour, prev.curr.min, prev.curr.sec);
+  		prev.bgn.hour, prev.bgn.min, prev.bgn.sec, prev.passed.hour, prev.passed.min, prev.passed.sec);
       fprintf(path_vrtx_num_fp, "est cost %f passed cost %f\n", prev.est_cost, prev.rout_cost);
   		fprintf(path_vrtx_pos_fp, "%f %f\n", vrtx[prev.dst_num].pos.x, vrtx[prev.dst_num].pos.y);
     }
@@ -336,14 +336,14 @@ int arrv_num, tim_t dptr){
 	return;
 }
 
-static tim_expd_edge_t findPrevEdge(tim_expd_edge_t curr, vertex_t *vrtx){
+static tim_expd_edge_t findPrevEdge(tim_expd_edge_t passed, vertex_t *vrtx){
 	vertex_t tmp_vrtx;
-	tmp_vrtx.ptr = vrtx[curr.orgn_num].head;
+	tmp_vrtx.ptr = vrtx[passed.orgn_num].head;
 	while(NULL != tmp_vrtx.ptr){
-		if(tmp_vrtx.ptr->num == curr.dst_num){
+		if(tmp_vrtx.ptr->num == passed.dst_num){
 			tmp_vrtx.ptr->t_ptr = tmp_vrtx.ptr->t_head;
 			while(NULL != tmp_vrtx.ptr->t_ptr){
-				if(TRUE == existTimSpac(curr.bgn, tmp_vrtx.ptr->t_ptr->bgn_tim, tmp_vrtx.ptr->t_ptr->end_tim)){
+				if(TRUE == existTimSpac(passed.bgn, tmp_vrtx.ptr->t_ptr->bgn_tim, tmp_vrtx.ptr->t_ptr->end_tim)){
 					return tmp_vrtx.ptr->t_ptr->dij_meta.prev;
 				}
 				tmp_vrtx.ptr->t_ptr = tmp_vrtx.ptr->t_ptr->next;
@@ -357,7 +357,7 @@ static tim_expd_edge_t findPrevEdge(tim_expd_edge_t curr, vertex_t *vrtx){
 
 /**
 *待ち時間が発生した頂点をファイル出力する．
-*@param curr 経路上に存在する辺集合のうち，現在参照している辺
+*@param passed 経路上に存在する辺集合のうち，現在参照している辺
 *@param *vrtx 交差点を示す頂点集合
 *@param dptr_num 出発地点を示す頂点の番号
 *@param arrv_num 到着地点を示す頂点の番号
@@ -383,7 +383,7 @@ int arrv_num, tim_t dptr){
 		if(EMPTY == prev.orgn_num)
 			break;
 		curr_sec = curr.bgn.hour * 60.0f * 60.0f + curr.bgn.min * 60.0f + curr.bgn.sec;
-		prev_sec = prev.curr.hour * 60.0f * 60.0f + prev.curr.min * 60.0f + prev.curr.sec;
+		prev_sec = prev.passed.hour * 60.0f * 60.0f + prev.passed.min * 60.0f + prev.passed.sec;
 		diff_sec = curr_sec - prev_sec;
 		if(0.0f < diff_sec){
 			fprintf(wait_vrtx_pos_fp, "%f %f\n", vrtx[curr.orgn_num].pos.x, vrtx[curr.orgn_num].pos.y);
@@ -426,12 +426,12 @@ void Dijkstra(vertex_t *vrtx, int vrtx_sz, int dptr_num, int arrv_num, tim_t dpt
 			while(NULL != vrtx[trgt.dst_num].ptr->t_ptr){
 				/* 最小コストを持つ辺を通過し終わる時刻が位置する時間空間を見つけたならば， */
 				/* それ以降の時間空間へは遷移可能とする． */
-				if(TRUE == existTimSpac(trgt.curr, vrtx[trgt.dst_num].ptr->t_ptr->bgn_tim,
+				if(TRUE == existTimSpac(trgt.passed, vrtx[trgt.dst_num].ptr->t_ptr->bgn_tim,
 				vrtx[trgt.dst_num].ptr->t_ptr->end_tim ))
 					enbl_tim_spac_trans = TRUE;
 				/* もし時間空間へ遷移可能ならば，その時間空間の辺を通過する為の待ち時間wait_secを求める． */
 				if(TRUE == enbl_tim_spac_trans){
-					wait_sec = getWaitTimSec(vrtx[trgt.dst_num].ptr->t_ptr->bgn_tim, trgt.curr);
+					wait_sec = getWaitTimSec(vrtx[trgt.dst_num].ptr->t_ptr->bgn_tim, trgt.passed);
 					wait_cost = wait_sec;
 					/* 現在の到達コストのより更にコストの低い経路を見つけたならば，到達コストを更新する*/
 					if(TRUE == condiUpdtRoutCost(vrtx[trgt.dst_num].ptr->t_ptr->dij_meta.path_cost,

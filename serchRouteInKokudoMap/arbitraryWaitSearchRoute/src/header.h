@@ -31,12 +31,14 @@ typedef struct tim_expd_edge_t{
 	int dst_num;
 	tim_t bgn; //辺が持つ時間空間の始端時刻
 	tim_t end; //辺が持つ時間空間の終端時刻
-	tim_t curr; //頂点への到達時刻
+	tim_t passed; //頂点への到達時刻
+	double est_cost; //帰着点までの予測値(A*探索の時に使用)
 	double rout_cost; //頂点への到達コスト
 }tim_expd_edge_t;
 
 /* ダイクストラ法による経路探索用のメタデータ */
 typedef struct dij_find_path_t{
+	double est_cost;
 	double path_cost;
 	int find_state;
 	tim_expd_edge_t prev;
@@ -126,6 +128,8 @@ typedef struct build_grid_t{
 **/
 double max_bld_wdth;
 double lmbd;
+int find_path_algrthm;
+double vel;
 
 void setInptFilesData(vertex_set_t *vrtx_st, build_set_t* bld_st);
 build_grid_t **cretGrdMap(build_set_t bld_st, xy_coord_t grd_len,

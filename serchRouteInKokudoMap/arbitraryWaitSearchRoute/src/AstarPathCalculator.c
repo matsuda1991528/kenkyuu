@@ -51,7 +51,7 @@ static void cpyTimExpdEdge(tim_expd_edge_t orgn_edge, tim_expd_edge_t *dst_edge)
   /* 辺の始端時刻，終端時刻，通過し終わった時刻をコピーする． */
   cpyTim(orgn_edge.bgn, &dst_edge->bgn);
   cpyTim(orgn_edge.end, &dst_edge->end);
-  cpyTim(orgn_edge.curr, &dst_edge->curr);
+  cpyTim(orgn_edge.passed, &dst_edge->passed);
   dst_edge->orgn_num = orgn_edge.orgn_num;
   dst_edge->dst_num = orgn_edge.dst_num;
   dst_edge->rout_cost = orgn_edge.rout_cost;
@@ -189,7 +189,7 @@ static void PrintTimExpdEdge(tim_expd_edge_t trgt_edge){
   fprintf(stdout, "%d -> %d\n", trgt_edge.orgn_num, trgt_edge.dst_num);
   fprintf(stdout, "bgn:%2d:%2d:%3.1f\t", trgt_edge.bgn.hour, trgt_edge.bgn.min, trgt_edge.bgn.sec);
   fprintf(stdout, "end:%2d:%2d:%3.1f\t", trgt_edge.end.hour, trgt_edge.end.min, trgt_edge.end.sec);
-  fprintf(stdout, "passed:%2d:%2d:%3.1f\n", trgt_edge.curr.hour, trgt_edge.curr.min, trgt_edge.curr.sec);
+  fprintf(stdout, "passed:%2d:%2d:%3.1f\n", trgt_edge.passed.hour, trgt_edge.passed.min, trgt_edge.passed.sec);
   fprintf(stdout, "passed cost = %f\tpassed e_cost = %f\n", trgt_edge.rout_cost, trgt_edge.est_cost);
 
 }
@@ -216,7 +216,7 @@ static void printPriorityQueue(priority_queue_t *head){
     fprintf(stderr, "%2d->%2d bgn:%2d:%2d:%3.1f end:%2d:%2d:%3.1f\tpassed:%2d:%2d:%3.1f est cost:%f rout cost:%f\n", ptr->edge.orgn_num,
     ptr->edge.dst_num, ptr->edge.bgn.hour, ptr->edge.bgn.min, ptr->edge.bgn.sec,
     ptr->edge.end.hour, ptr->edge.end.min, ptr->edge.end.sec,
-    ptr->edge.curr.hour, ptr->edge.curr.min, ptr->edge.curr.sec, ptr->edge.est_cost, ptr->edge.rout_cost);
+    ptr->edge.passed.hour, ptr->edge.passed.min, ptr->edge.passed.sec, ptr->edge.est_cost, ptr->edge.rout_cost);
     ptr = ptr->next;
   }
   fprintf(stderr, "***************************\n");
@@ -248,16 +248,16 @@ double arrv_cost, tim_expd_edge_t curr, double append_sec){
   neighbor->est_cost = est_cost;
   neighbor->rout_cost = arrv_cost;
   /* 直前に通過した辺を通過終了時刻に隣接辺の所要時間と待ち時間を加算する． */
-  cpyTim(curr.curr, &neighbor->curr);
-  neighbor->curr.sec += append_sec;
-  fixTimFormat(&neighbor->curr);
+  cpyTim(curr.passed, &neighbor->passed);
+  neighbor->passed.sec += append_sec;
+  fixTimFormat(&neighbor->passed);
   return;
 }
 
 static void updateAstarQueue(time_space_list_t *edge, tim_expd_edge_t neighbor){
   edge->dij_meta.est_cost = neighbor.est_cost;
   edge->dij_meta.path_cost = neighbor.rout_cost;
-  cpyTim(neighbor.curr, &edge->dij_meta.arrv_tim);
+  cpyTim(neighbor.passed, &edge->dij_meta.arrv_tim);
 
   return;
 }
@@ -329,13 +329,13 @@ void A_star(vertex_t *vrtx, int vrtx_sz, int dptr_num, int arrv_num, tim_t dptr)
           goto SKIP;
         }
         /* 隣接辺が通過可能かを判定する */
-        if(existTimSpac(curr.curr, neighbor.bgn, neighbor.end))
+        if(existTimSpac(curr.passed, neighbor.bgn, neighbor.end))
           enbl_tim_spac_trans = TRUE;
 
         if(enbl_tim_spac_trans){ /* 時空間を持つ隣接辺を通過する為の待ち時間を求める． */
           //fprintf(stderr, "bgn:%2d:%2d:%3.1f -- end:%2d:%2d:%3.1f\n", neighbor.bgn.hour, neighbor.bgn.min,
           //neighbor.bgn.sec, neighbor.end.hour, neighbor.end.min, neighbor.end.sec);
-          wait_sec = getWaitTimSec(neighbor.bgn, curr.curr); //待ち時間の算出
+          wait_sec = getWaitTimSec(neighbor.bgn, curr.passed); //待ち時間の算出
           neighbor_edge_cost = vrtx[curr.dst_num].ptr->t_ptr->edge_cost; //エッジのコスト
           tmp_rout_cost = curr.rout_cost + wait_sec + neighbor_edge_cost; //隣接辺を通過した時のコストg(n)
           //fprintf(stderr, "%f = %f + %f + %f\n", tmp_rout_cost, curr.rout_cost, wait_sec, neighbor_edge_cost);
