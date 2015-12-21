@@ -270,10 +270,16 @@ static int condiUpdtRoutCost(double befr_cost, double aftr_cost){
 
 /* キューにおけるコスト，到達時刻，通過頂点を保存する． */
 static void updatPathQue(adj_list_t *edge, tim_expd_edge_t trgt, double wait_sec){
-	edge->t_ptr->dij_meta.path_cost = trgt.rout_cost + edge->t_ptr->edge_cost + wait_sec;
+  /* 辺の到達コストの更新．直前に通過した辺への到達コストにその辺の移動コストと待ち時間を加算する． */
+  edge->t_ptr->dij_meta.path_cost = trgt.rout_cost + edge->t_ptr->edge_cost + wait_sec;
 
+  /* 辺の到達時刻の更新．直前に通過した辺を通過し終わる時刻にその辺の所要時間と待ち時間を加算する． */
+  /* その後，時刻を60進数に修正する */
 	cpyTim(trgt.curr, &edge->t_ptr->dij_meta.arrv_tim);
+  edge->t_ptr->dij_meta.arrv_tim.sec += edge->edge_trvt + wait_sec;
 	fixTimFormat(&edge->t_ptr->dij_meta.arrv_tim);
+
+  /* 隣接辺の直前に通過した辺情報を更新する． */
 	edge->t_ptr->dij_meta.prev.orgn_num = trgt.orgn_num;
 	edge->t_ptr->dij_meta.prev.dst_num = trgt.dst_num;
 	cpyTim(trgt.bgn, &edge->t_ptr->dij_meta.prev.bgn);
