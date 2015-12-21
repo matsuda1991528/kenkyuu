@@ -7,6 +7,7 @@
 #include "define.h"
 
 void dtctFileOpn(FILE **fp, char *fname, char *mode);
+void A_star(vertex_t *vrtx, int vrtx_sz, int dptr_num, int arrv_num, tim_t dptr);
 
 /**
 *時刻を表す構造体の各メンバをコピーする．
@@ -14,7 +15,7 @@ void dtctFileOpn(FILE **fp, char *fname, char *mode);
 *@param *dst コピー先の時刻
 *@return none
 */
-static void cpyTim(tim_t orgn, tim_t *dst){
+void cpyTim(tim_t orgn, tim_t *dst){
   dst->hour = orgn.hour;
   dst->min = orgn.min;
 	dst->sec = orgn.sec;
@@ -49,6 +50,7 @@ void initDijVrtx(vertex_t *vrtx, int vrtx_sz){
 			while(NULL != vrtx[i].ptr->t_ptr){
 				/* ここに初期化処理を書く */
 				vrtx[i].ptr->t_ptr->dij_meta.path_cost = EMPTY;
+        vrtx[i].ptr->t_ptr->dij_meta.est_cost = EMPTY;
 				vrtx[i].ptr->t_ptr->dij_meta.find_state = FALSE;
 				vrtx[i].ptr->t_ptr->dij_meta.prev.orgn_num = EMPTY;
 				initTim(&vrtx[i].ptr->t_ptr->dij_meta.prev.bgn);
@@ -71,7 +73,7 @@ void initDijVrtx(vertex_t *vrtx, int vrtx_sz){
 *@param bgn 始端時刻
 *@param end 始端時刻
 */
-static int existTimSpac(tim_t trgt, tim_t bgn, tim_t end){
+int existTimSpac(tim_t trgt, tim_t bgn, tim_t end){
 	int trgt_min = trgt.hour * 60 + trgt.min;
 	int bgn_min = bgn.hour * 60 + bgn.min;
 	int end_min = end.hour * 60 + end.min;
@@ -87,7 +89,7 @@ static int existTimSpac(tim_t trgt, tim_t bgn, tim_t end){
 *時刻をそれぞれ60進数に変換する
 *@param tim 変換対象時刻
 */
-static void fixTimFormat(tim_t *tim){
+void fixTimFormat(tim_t *tim){
 	if(EMPTY == tim->hour)
 		tim->hour = 0;
 	if(EMPTY == tim->min)
@@ -117,18 +119,19 @@ static void fixTimFormat(tim_t *tim){
 *@param dptr 出発時刻
 *@return none
 */
-static void initDptrVrtx(adj_list_t *edge, tim_t dptr){
+void initDptrVrtx(adj_list_t *edge, tim_t dptr){
 	while(NULL != edge->t_ptr){
 		if(TRUE == existTimSpac(dptr, edge->t_ptr->bgn_tim, edge->t_ptr->end_tim)){
 			edge->t_ptr->dij_meta.path_cost = edge->t_ptr->edge_cost;
 			edge->t_ptr->dij_meta.arrv_tim.hour = dptr.hour;
 			edge->t_ptr->dij_meta.arrv_tim.min = dptr.min;
-			edge->t_ptr->dij_meta.arrv_tim.sec += edge->edge_trvt;
+			edge->t_ptr->dij_meta.arrv_tim.sec = edge->edge_trvt;
 			fixTimFormat(&edge->t_ptr->dij_meta.arrv_tim);
 			break;
 		}
 		edge->t_ptr = edge->t_ptr->next;
 	}
+
 	return;
 }
 
@@ -137,7 +140,7 @@ static void initDptrVrtx(adj_list_t *edge, tim_t dptr){
 @param *trgt 探索済みの辺の終端を示す頂点のポインタ
 @return none
 */
-static void initTrgtVrtx(tim_expd_edge_t *trgt){
+void initTrgtVrtx(tim_expd_edge_t *trgt){
 	trgt->orgn_num = EMPTY;
 	trgt->dst_num = EMPTY;
 	trgt->bgn.hour = trgt->bgn.min = trgt->bgn.sec = EMPTY;
@@ -178,7 +181,7 @@ static void swtchSrchStatFrmFalse2True(tim_expd_edge_t trgt, adj_list_t *edge_he
 
 /* 出発地から最もコストの少ない頂点を探索し， */
 /* その頂点を探索対象頂点とする． */
-static void findTrgtVrtx(tim_expd_edge_t *trgt, vertex_t *vrtx, int vrtx_sz){
+void findTrgtVrtx(tim_expd_edge_t *trgt, vertex_t *vrtx, int vrtx_sz){
 	vertex_t tmp_vrtx;
 	int i;
 	double min_cost = EMPTY;
@@ -224,11 +227,16 @@ EMPTY→dptr_numを結ぶ辺とし，
 また，辺を通過し終わる時刻currには，
 出発時刻が格納される．
 */
-static void exceptTrgtVrtx(tim_expd_edge_t *trgt, int dptr_num, tim_t dptr){
+void exceptTrgtVrtx(tim_expd_edge_t *trgt, int dptr_num, tim_t dptr){
 	if(trgt->orgn_num == EMPTY){
 		trgt->dst_num = dptr_num;
 		trgt->rout_cost = 0.0f;
 		cpyTim(dptr, &trgt->curr);
+    trgt->bgn.hour = trgt->bgn.min = 0;
+    trgt->bgn.sec = 0.0f;
+    trgt->end.hour = 23;
+    trgt->end.min = 59;
+    trgt->end.sec = 59.9f;
 	}
 	return;
 }
@@ -241,7 +249,7 @@ static double cvtMin2Sec(int min){
 	return (double)min * 60.0f;
 }
 
-static double getWaitTimSec(tim_t dst, tim_t orgn){
+double getWaitTimSec(tim_t dst, tim_t orgn){
 	double wait_sec = 0.0f;
 	double dst_sec = cvthour2Sec(dst.hour) + cvtMin2Sec(dst.min) + dst.sec;
 	double orgn_sec = cvthour2Sec(orgn.hour) + cvtMin2Sec(orgn.min) + orgn.sec;
@@ -265,7 +273,6 @@ static void updatPathQue(adj_list_t *edge, tim_expd_edge_t trgt, double wait_sec
 	edge->t_ptr->dij_meta.path_cost = trgt.rout_cost + edge->t_ptr->edge_cost + wait_sec;
 
 	cpyTim(trgt.curr, &edge->t_ptr->dij_meta.arrv_tim);
-	edge->t_ptr->dij_meta.arrv_tim.sec += edge->edge_trvt + wait_sec;
 	fixTimFormat(&edge->t_ptr->dij_meta.arrv_tim);
 	edge->t_ptr->dij_meta.prev.orgn_num = trgt.orgn_num;
 	edge->t_ptr->dij_meta.prev.dst_num = trgt.dst_num;
@@ -292,11 +299,13 @@ int arrv_num, tim_t dptr){
 	dtctFileOpn(&path_vrtx_pos_fp, path_vrtx_pos_fname, "w");
 
 	while(EMPTY != prev.orgn_num){
-
-		fprintf(path_vrtx_num_fp, "%5d <- %5d time %2d:%2d:%2.0f<--%2d:%2d:%2.0f  arrv %2d:%2d:%2.0f\n",prev.dst_num,
-		prev.orgn_num, prev.end.hour, prev.end.min, prev.end.sec,
-		prev.bgn.hour, prev.bgn.min, prev.bgn.sec, prev.curr.hour, prev.curr.min, prev.curr.sec);
-		fprintf(path_vrtx_pos_fp, "%f %f\n", vrtx[prev.dst_num].pos.x, vrtx[prev.dst_num].pos.y);
+    if(arrv_num != prev.orgn_num){
+  		fprintf(path_vrtx_num_fp, "%5d <- %5d time %2d:%2d:%2.0f<--%2d:%2d:%2.0f  arrv %2d:%2d:%2.0f\n",prev.dst_num,
+  		prev.orgn_num, prev.end.hour, prev.end.min, prev.end.sec,
+  		prev.bgn.hour, prev.bgn.min, prev.bgn.sec, prev.curr.hour, prev.curr.min, prev.curr.sec);
+      fprintf(path_vrtx_num_fp, "est cost %f passed cost %f\n", prev.est_cost, prev.rout_cost);
+  		fprintf(path_vrtx_pos_fp, "%f %f\n", vrtx[prev.dst_num].pos.x, vrtx[prev.dst_num].pos.y);
+    }
 		/* 直前に通過した辺の始端点が終端点となる辺に対する繰り返し */
 		tmp_vrtx.ptr = vrtx[prev.orgn_num].head;
 		while(NULL != tmp_vrtx.ptr){
@@ -349,7 +358,7 @@ static tim_expd_edge_t findPrevEdge(tim_expd_edge_t curr, vertex_t *vrtx){
 *@param dptr 出発時刻
 *@return none
 */
-static void printWaitedPartPath(tim_expd_edge_t curr, vertex_t *vrtx, int dptr_num,
+void printWaitedPartPath(tim_expd_edge_t curr, vertex_t *vrtx, int dptr_num,
 int arrv_num, tim_t dptr){
 	FILE *wait_vrtx_pos_fp;
 	char wait_vrtx_pos_fname[100];
@@ -440,6 +449,14 @@ void Dijkstra(vertex_t *vrtx, int vrtx_sz, int dptr_num, int arrv_num, tim_t dpt
 }
 
 void srchRoute(vertex_set_t vrtx_st, int dptr_num, int arrv_num, tim_t dptr){
-
-  Dijkstra(vrtx_st.indx, vrtx_st.sz, dptr_num, arrv_num, dptr);
+	if(DIJKSTRA == find_path_algrthm){
+  	Dijkstra(vrtx_st.indx, vrtx_st.sz, dptr_num, arrv_num, dptr);
+	}
+	else if(A_STAR == find_path_algrthm){
+		A_star(vrtx_st.indx, vrtx_st.sz, dptr_num, arrv_num, dptr);
+	}
+	else{
+		fprintf(stderr, "Usage: find_path_algrthm -> 0 find path by dijkstra\n");
+		fprintf(stderr, "     : find_path_algrthm -> 1 find path by a_star\n");
+	}
 }
