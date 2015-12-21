@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <time.h>
 #include "header.h"
 #include "define.h"
 
@@ -33,15 +34,6 @@ typedef struct priority_queue_t{
   struct priority_queue_t *next;
 }priority_queue_t;
 
-// typedef struct neighbor_edge_t{
-//   int orgn_num;
-//   int dst_num;
-//   tim_t bgn;
-//   tim_t end;
-//   double edge_cost;
-//   double est_cost;
-// }neighbor_edge_t;
-
 /* 優先度つきキューに頂点を格納する為の記憶領域の取得 */
 static struct priority_queue_t *priorityQueueMalloc(void){
   return (priority_queue_t *)malloc(sizeof(priority_queue_t));
@@ -68,6 +60,13 @@ static void cpyTimExpdEdge(tim_expd_edge_t orgn_edge, tim_expd_edge_t *dst_edge)
   return;
 }
 
+/**
+*隣接辺の始端頂点番号と終端頂点番号を割り当てる．
+*@param *neighbor 隣接辺データが格納されているアドレスを指すポインタ
+*@param orgn_num 始端頂点番号
+*@param dst_num 終端頂点番号
+*@return none
+*/
 static void setNeighborVrtxNum(tim_expd_edge_t *neighbor, int orgn_num, int dst_num){
   neighbor->orgn_num = orgn_num;
   neighbor->dst_num = dst_num;
@@ -75,6 +74,12 @@ static void setNeighborVrtxNum(tim_expd_edge_t *neighbor, int orgn_num, int dst_
   return;
 }
 
+/**
+*隣接辺の始端時刻と終端時刻，そして推定コストを割り当てる．
+*@param *neighbor 隣接辺データが格納されているアドレスを指すポインタ
+*@param *t_ptr コピー元データが格納されているアドレスを指すポインタ
+*@return none
+*/
 static void setNeighborTimAndCost(tim_expd_edge_t *neighbor, time_space_list_t *t_ptr){
   cpyTim(t_ptr->bgn_tim, &neighbor->bgn);
   cpyTim(t_ptr->end_tim, &neighbor->end);
@@ -124,7 +129,7 @@ static int isEqualTim(tim_t orgn, tim_t trgt){
 *二つの辺が等しいかを判定する．
 */
 static int isEqualPairOfEdge(tim_expd_edge_t orgn, tim_expd_edge_t terget){
-  if(orgn.orgn_num == terget.orgn_num && orgn.dst_num && terget.dst_num){
+  if(orgn.orgn_num == terget.orgn_num && orgn.dst_num == terget.dst_num){
     if(isEqualTim(orgn.bgn, terget.bgn) && isEqualTim(orgn.end, terget.end)){
       return TRUE;
     }
@@ -142,11 +147,13 @@ static int isEqualPairOfEdge(tim_expd_edge_t orgn, tim_expd_edge_t terget){
 */
 static void popCurrEdgeFrmQueue(priority_queue_t *list, tim_expd_edge_t trgt_edge,
 int *lst_sz){
+  //dprintf("\npop edge : %d -> %d\n", trgt_edge.orgn_num, trgt_edge.dst_num);
 
   list->q_old = list->q_ptr = list->q_head;
   while(NULL != list->q_ptr){
     if(isEqualPairOfEdge(list->q_ptr->edge, trgt_edge)){
       //dprintf("poped edge : %d -> %d\n", trgt_edge.orgn_num, trgt_edge.dst_num);
+      //dprintf("poped edge : %d -> %d\n", list->q_ptr->edge.orgn_num, list->q_ptr->edge.dst_num);
       if(list->q_ptr == list->q_head){
         if(1 < *lst_sz)
           list->q_head = list->q_ptr->next;
@@ -231,16 +238,27 @@ static void printPriorityQueue(priority_queue_t *head){
 */
 static double getEstMateCost(double path_cost, xy_coord_t orgn, xy_coord_t dst){
   double dist = getDist(orgn, dst);
-  return dist + path_cost;
+  return dist / vel + path_cost;
 }
 
+/* 隣接辺のコスト，通過終了時刻，を更新する． */
 static void updateNeighbor(tim_expd_edge_t *neighbor, double est_cost,
 double arrv_cost, tim_expd_edge_t curr, double append_sec){
+  /* 推定コスト，到達コストの更新 */
   neighbor->est_cost = est_cost;
   neighbor->rout_cost = arrv_cost;
+  /* 直前に通過した辺を通過終了時刻に隣接辺の所要時間と待ち時間を加算する． */
   cpyTim(curr.curr, &neighbor->curr);
   neighbor->curr.sec += append_sec;
   fixTimFormat(&neighbor->curr);
+  return;
+}
+
+static void updateAstarQueue(time_space_list_t *edge, tim_expd_edge_t neighbor){
+  edge->dij_meta.est_cost = neighbor.est_cost;
+  edge->dij_meta.path_cost = neighbor.rout_cost;
+  cpyTim(neighbor.curr, &edge->dij_meta.arrv_tim);
+
   return;
 }
 
@@ -264,65 +282,96 @@ void A_star(vertex_t *vrtx, int vrtx_sz, int dptr_num, int arrv_num, tim_t dptr)
 
   initList(&open_lst, &closed_lst); /* オープンリスト，クローズリストを作成するんじゃ～ */
   pushEdge2Queue(&open_lst, curr, &open_lst_sz); //仮想のEMPTY->dptr_num間の辺をOpenリストにプッシュする．
+
+  clock_t start = clock();
+
+  int iterater = 0;
   /* Openリストが空ならば，探索を終了する． */
   while(0 < open_lst_sz){
+    iterater++;
     prev = curr;
     findTrgtEdgeFrmOpenLst(open_lst.q_head, &curr); /* オープンリストの中から，最小の推測値を持つ辺を抽出する． */
     if(arrv_num == curr.dst_num){ /* 帰着点を始端とする辺が探索対象辺に選択されたならば，終了 */
       break;
     }
+
+    // fprintf(stdout, "\n\n iterate num = %d\nbefore open list\n", iterater);
+    // fprintf(stdout, "terget edge %d -> %d\n", curr.orgn_num, curr.dst_num);
+    // printPriorityQueue(open_lst.q_head);
+    // fprintf(stdout, "before close list\n");
+    // printPriorityQueue(closed_lst.q_head);
+
     /* オープンリストから最小の推定値を持つ辺を取り出す． */
     popCurrEdgeFrmQueue(&open_lst, curr, &open_lst_sz);
     /* 取り出した辺をクローズリストへ移す */
     pushEdge2Queue(&closed_lst, curr, &closed_lst_sz);
 
+
+    // fprintf(stdout, "\n\nafter open list\n");
+    // printPriorityQueue(open_lst.q_head);
+    // fprintf(stdout, "after close list\n");
+    // printPriorityQueue(closed_lst.q_head);
+    // fprintf(stdout, "\n\n\n\n\n\n\n\n\n\n\n\n\n");
+
     while(NULL != vrtx[curr.dst_num].ptr){ /* 隣接辺に対する繰り返し */
+      /* 隣接辺の始端頂点と終端頂点番号を割り当てる */
       setNeighborVrtxNum(&neighbor, curr.dst_num, vrtx[curr.dst_num].ptr->num);
       neighbor_trv_sec = vrtx[curr.dst_num].ptr->edge_trvt;
       enbl_tim_spac_trans = FALSE;
 
       vrtx[curr.dst_num].ptr->t_ptr = vrtx[curr.dst_num].ptr->t_head;
       while(NULL != vrtx[curr.dst_num].ptr->t_ptr){ /* 隣接辺の時間空間に対する繰り返し */
+        /* 隣接辺の始端時刻と終端時刻，そして推定コストを割り当てる． */
         setNeighborTimAndCost(&neighbor, vrtx[curr.dst_num].ptr->t_ptr);
+        //fprintf(stderr, "\n\n%d -> %d trav_sec = %f\n", neighbor.orgn_num, neighbor.dst_num, neighbor_trv_sec);
 
-        // if(neighborInLst(closed_lst.q_head, neighbor)){ /* 計算済の辺については，計算しない */
-        //   goto SKIP;
-        // }
+        if(neighborInLst(closed_lst.q_head, neighbor)){ /* 計算済の辺については，計算しない */
+          goto SKIP;
+        }
+        /* 隣接辺が通過可能かを判定する */
         if(existTimSpac(curr.curr, neighbor.bgn, neighbor.end))
           enbl_tim_spac_trans = TRUE;
 
         if(enbl_tim_spac_trans){ /* 時空間を持つ隣接辺を通過する為の待ち時間を求める． */
-          wait_sec = getWaitTimSec(neighbor.bgn, curr.curr);
-          neighbor_edge_cost = vrtx[curr.dst_num].ptr->t_ptr->edge_cost;
-          tmp_rout_cost = curr.rout_cost + wait_sec + neighbor_edge_cost;
-          tmp_est_cost = tmp_rout_cost + getDist(vrtx[neighbor.dst_num].pos, vrtx[arrv_num].pos); /* 推定値の計算 */
-          /* 現在探索した隣接辺がオープンリストにも，クローズリストにも含まれていない場合 */
-          /* オープンリストに追加する． */
-          if(FALSE == neighborInLst(open_lst.q_head, neighbor) &&
-          FALSE == neighborInLst(closed_lst.q_head, neighbor)){
+          //fprintf(stderr, "bgn:%2d:%2d:%3.1f -- end:%2d:%2d:%3.1f\n", neighbor.bgn.hour, neighbor.bgn.min,
+          //neighbor.bgn.sec, neighbor.end.hour, neighbor.end.min, neighbor.end.sec);
+          wait_sec = getWaitTimSec(neighbor.bgn, curr.curr); //待ち時間の算出
+          neighbor_edge_cost = vrtx[curr.dst_num].ptr->t_ptr->edge_cost; //エッジのコスト
+          tmp_rout_cost = curr.rout_cost + wait_sec + neighbor_edge_cost; //隣接辺を通過した時のコストg(n)
+          //fprintf(stderr, "%f = %f + %f + %f\n", tmp_rout_cost, curr.rout_cost, wait_sec, neighbor_edge_cost);
+          tmp_est_cost = tmp_rout_cost + (getDist(vrtx[neighbor.dst_num].pos, vrtx[arrv_num].pos) / vel); /* 推定値f(n)の計算 */
+
+          /* 未探索の辺を探索した場合,オープンリストに追加する．この時，辺の到達コスト，直前に通過した辺も更新する． */
+          if(!neighborInLst(open_lst.q_head, neighbor)){
             updateNeighbor(&neighbor, tmp_est_cost, tmp_rout_cost, curr, wait_sec + neighbor_trv_sec);
+            updateAstarQueue(vrtx[curr.dst_num].ptr->t_ptr, neighbor);
+
             pushEdge2Queue(&open_lst, neighbor, &open_lst_sz);
             cpyTimExpdEdge(curr, &vrtx[curr.dst_num].ptr->t_ptr->dij_meta.prev);
           }
-          else if(neighborInLst(open_lst.q_head, neighbor) && neighbor.est_cost > tmp_est_cost){
+          else if(neighbor.est_cost > tmp_est_cost){
             updateNeighbor(&neighbor, tmp_est_cost, tmp_rout_cost, curr, wait_sec + neighbor_trv_sec);
+            updateAstarQueue(vrtx[curr.dst_num].ptr->t_ptr, neighbor);
             cpyTimExpdEdge(curr, &vrtx[curr.dst_num].ptr->t_ptr->dij_meta.prev);
-          }
-          else if(neighborInLst(closed_lst.q_head, neighbor) && neighbor.est_cost > tmp_est_cost){
-            updateNeighbor(&neighbor, tmp_est_cost, tmp_rout_cost, curr, wait_sec + neighbor_trv_sec);
-            cpyTimExpdEdge(curr, &vrtx[curr.dst_num].ptr->t_ptr->dij_meta.prev);
-            pushEdge2Queue(&open_lst, neighbor, &open_lst_sz);
           }
         }
-        // SKIP:
+        SKIP:
+        //printPriorityQueue(open_lst.q_head);
         vrtx[curr.dst_num].ptr->t_ptr = vrtx[curr.dst_num].ptr->t_ptr->next;
       }
       vrtx[curr.dst_num].ptr = vrtx[curr.dst_num].ptr->next;
     }
   }
-  printOptmPath(prev, vrtx, dptr_num, arrv_num, dptr);
+  //fprintf(stdout, "open list size : %d\n", open_lst_sz);
+  if(0 == open_lst_sz)
+    fprintf(stdout, "failed arrive goal\n");
+  else
+    fprintf(stdout, "goal to success\n");
+  printOptmPath(curr, vrtx, dptr_num, arrv_num, dptr);
   fprintf(stdout, "after goal\n");
   //fprintf(stdout, "%d -> %d est:%f arv:%f\n", prev.orgn_num, prev.dst_num, prev.est_cost, prev.rout_cost);
   fprintf(stdout, "%d -> %d est:%f arv:%f\n", curr.orgn_num, curr.dst_num, curr.est_cost, curr.rout_cost);
+  clock_t end = clock();
+  fprintf(stdout, "process time %lf[ms]", (double)(end - start));
   return;
 }
