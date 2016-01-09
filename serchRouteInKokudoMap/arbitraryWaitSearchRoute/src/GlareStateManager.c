@@ -162,6 +162,10 @@ static double getPerpDist(double azim, xy_coord_t obs_pos, xy_coord_t bld_pos){
 *2. 建物の幅より垂線の距離が短いならば影の長さを算出する．
 *　if 影の長さが建物との距離より長いならば，太陽は隠れると判断
 *   otherwise 次の建物を参照し，1．へ
+*@param sun 太陽角度
+*@param obs_pos 観測地
+*@param *head 建物集合の先頭リスト
+*@return TRUE：西日が遮られる．　FALSE：西日が遮られない
  */
 int fndBldHydedSun(sun_angle_t sun, xy_coord_t obs_pos, build_pos_t *head){
 	build_pos_t *ptr;
@@ -172,13 +176,18 @@ int fndBldHydedSun(sun_angle_t sun, xy_coord_t obs_pos, build_pos_t *head){
 	ptr = head;
 	ptr = ptr->next;
 	while(ptr != NULL){
+    bu_dist = getDist(obs_pos, ptr->pos);  //建物と観測地の距離を求める
+    if(bu_dist < ptr->wdth) //現在地が建物で覆われるならば，西日は遮蔽される．
+      return TRUE;
+
 		perp_dist = getPerpDist(sun.azim, obs_pos, ptr->pos); //垂線の長さを求める
 		if(perp_dist <= ptr->wdth){
-		    shdw_len = BUILD_HIGH * (1 / tan(getRadian(sun.elev)))
-				    + fabs(cos(getRadian(sun.azim))) * ptr->wdth;  //影の長さを求める
-		    bu_dist = getDist(obs_pos, ptr->pos);  //建物と観測地の距離を求める
-        if(shdw_len >= bu_dist) //建物‐観測地間の距離と影の距離を比較
-          return TRUE;
+		  shdw_len = BUILD_HIGH * (1 / tan(getRadian(sun.elev)))
+				+ fabs(cos(getRadian(sun.azim))) * ptr->wdth;  //影の長さを求める
+
+      if(shdw_len >= bu_dist){ //建物‐観測地間の距離と影の距離を比較
+        return TRUE;
+      }
 		}
 		ptr = ptr->next;  //次の建物データを参照する
 	}
@@ -194,6 +203,12 @@ static int fndGlrOccredFromBld(sun_angle_t sun, xy_coord_t orgn_pos,
   build_grid_t **bld_grd, xy_coord_t grd_len, grid_size_t grd_cell_sz){
 /* 日影ベクトルの東西成分と南北成分の長さを計算する */
   xy_coord_t shdw_vctr = getShdwVctr(sun, BUILD_HIGH);
+
+  if(bef_indx_x != EMPTY){
+    if(fndBldHydedSun(sun, orgn_pos, bld_grd[bef_indx_y][bef_indx_x].head)){
+      return FALSE;
+    }
+  }
 
 /* 現在地へ日影が届き得る最遠の座標を求める． */
   xy_coord_t shdw_end_pos = getShdwTailPos(sun, orgn_pos, shdw_vctr);
@@ -225,8 +240,11 @@ static int fndGlrOccredFromBld(sun_angle_t sun, xy_coord_t orgn_pos,
   for(i=trv_bgn_y;i<=trv_end_y;i++){
     for(j=trv_bgn_x;j<=trv_end_x;j++){
 
-      if(TRUE == fndBldHydedSun(sun, orgn_pos, bld_grd[i][j].head))
+      if(fndBldHydedSun(sun, orgn_pos, bld_grd[i][j].head)){
+        bef_indx_x = j;
+        bef_indx_y = i;
         return FALSE;
+      }
     }
   }
   return TRUE;
