@@ -46,8 +46,8 @@ static void initVrtxTimSpce(adj_list_t *edge){
 static double getEdgeTrvSec(double kph, xy_coord_t orgn_pos, xy_coord_t dst_pos){
   /* 時速km/h から 秒速m/secに変換する． */
   double mps = kph / 3.6f;
+  vel = mps;
   double dist = getDist(orgn_pos, dst_pos);
-
   return dist / mps;
 }
 
@@ -147,7 +147,7 @@ int swtchStatFrmNonGlr2Glr(int bfre_glr_stat, int curr_glr_stat){
 static void tearoffTimSpcelst(adj_list_t *edge, double edge_trvt){
   edge->t_ptr->end_tim.hour = 23;
   edge->t_ptr->end_tim.min = 59;
-  edge->t_ptr->cost = edge_trvt;
+  edge->t_ptr->edge_cost = edge_trvt;
 
   edge->t_old->next = edge->t_ptr;
   edge->t_old = edge->t_ptr;
@@ -177,7 +177,7 @@ static void printAllEdge(vertex_t *vrtx, int vrtx_sz){
       while(NULL != tmp_vrtx.ptr->t_ptr){
         fprintf(fp, "bgn %2d:%2d\t", tmp_vrtx.ptr->t_ptr->bgn_tim.hour, tmp_vrtx.ptr->t_ptr->bgn_tim.min);
         fprintf(fp, "end %2d:%2d\t", tmp_vrtx.ptr->t_ptr->end_tim.hour, tmp_vrtx.ptr->t_ptr->end_tim.min);
-        fprintf(fp, "cost:%f\n", tmp_vrtx.ptr->t_ptr->cost);
+        fprintf(fp, "cost:%f\n", tmp_vrtx.ptr->t_ptr->edge_cost);
         tmp_vrtx.ptr->t_ptr = tmp_vrtx.ptr->t_ptr->next;
       }
       tmp_vrtx.ptr = tmp_vrtx.ptr->next;
@@ -227,7 +227,7 @@ void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
           if(TRUE == curr_glr_stat){
             curr_glr_val = getGlrVal(sun, orgn_pos, dst_pos);
             tmp_cost = curr_glr_val * edge_trvt;
-            setMaxCost(&vrtx_st.indx[i].ptr->t_ptr->cost, tmp_cost);
+            setMaxCost(&vrtx_st.indx[i].ptr->t_ptr->edge_cost, tmp_cost);
           }
           /* グレア発生状態からグレア未発生状態に切り替わったならば， */
           /* 終端時刻の格納と，時間空間リストを末尾に追加する． */
@@ -240,7 +240,7 @@ void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
           /* グレア未発生状態からグレア状態に切り替わったならば， */
           /* 終端時刻の格納と，時間空間リストを末尾に追加する */
           else if(TRUE == swtchStatFrmNonGlr2Glr(bfre_glr_stat, curr_glr_stat)){
-            vrtx_st.indx[i].ptr->t_ptr->cost = edge_trvt;
+            vrtx_st.indx[i].ptr->t_ptr->edge_cost = edge_trvt;
             setTimSpceEndTim(vrtx_st.indx[i].ptr, tim);
             appndTimSpceLst(vrtx_st.indx[i].ptr);
             setTimSpceBgnTim(vrtx_st.indx[i].ptr, tim);
