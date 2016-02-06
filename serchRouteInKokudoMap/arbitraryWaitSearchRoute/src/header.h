@@ -34,6 +34,10 @@ typedef struct tim_expd_edge_t{
 	tim_t passed; //頂点への到達時刻
 	double est_cost; //帰着点までの予測値(A*探索の時に使用)
 	double rout_cost; //頂点への到達コスト
+	double edge_trvt;
+	double edge_cst; //辺のコスト
+	double wait_sec;
+	struct tim_expd_edge_t *prev;
 }tim_expd_edge_t;
 
 /* ダイクストラ法による経路探索用のメタデータ */
@@ -45,6 +49,13 @@ typedef struct dij_find_path_t{
 	tim_t arrv_tim;
 }dij_find_path_t;
 
+typedef struct srch_state_t{
+	double wait_sec;
+	double arrv_cst;
+	double odd_cst;
+	double est_cst;
+}srch_state_t;
+
 
 /**
 **********************
@@ -55,7 +66,9 @@ typedef struct dij_find_path_t{
 typedef struct time_space_list_t{
 	tim_t bgn_tim; //時間空間Sへ遷移できる始端時刻
 	tim_t end_tim; //時間空間Sへ遷移できる終端時刻
-	double edge_cost;
+	double high_cost; //最悪値
+	double low_cost; //最良値
+	tim_t arch_low_cost_tim; //最良値に達した時刻
 	dij_find_path_t dij_meta;
 	struct time_space_list_t *next;
 }time_space_list_t;
@@ -121,6 +134,20 @@ typedef struct build_grid_t{
 	build_pos_t *old;
 }build_grid_t;
 
+/* 優先度つきキューを表す構造体 */
+typedef struct priority_queue_t{
+  tim_expd_edge_t edge;
+	struct priority_queue_t *next;
+}priority_queue_t;
+
+typedef struct priority_queue_set_t{
+	priority_queue_t *head;
+	priority_queue_t *ptr;
+	priority_queue_t *old;
+	int sz;
+}priority_queue_set_t;
+
+
 /**
 **********************
 *   グローバリー変数  *
@@ -130,12 +157,25 @@ double max_bld_wdth;
 double lmbd;
 int find_path_algrthm;
 double vel;
+int intrvl_sec;
+int bef_indx_x;
+int bef_indx_y;
+int direction_instance;
+char cost_output_file[100];
+char ex_network_file[100];
+int allct_cost_type;
+double final_cost;
+int map_type;
+
 
 void setInptFilesData(vertex_set_t *vrtx_st, build_set_t* bld_st);
 build_grid_t **cretGrdMap(build_set_t bld_st, xy_coord_t grd_len,
 	grid_size_t *grd_cell_sz);
 void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
 	xy_coord_t grd_len, grid_size_t grd_cell_sz, double kph);
-void srchRoute(vertex_set_t vrtx_st, int dptr_num, int arrv_num, tim_t dptr);
+void cretSttcTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
+  xy_coord_t grd_len, grid_size_t grd_cell_sz, double kph);
+void srchRoute(vertex_set_t vrtx_st, int dptr_num, int arrv_num, tim_t dptr,
+build_grid_t **bld_grd, xy_coord_t grd_len, grid_size_t grd_cell_sz);
 
 #endif

@@ -1,37 +1,74 @@
 #ifndef DEFINE_H
 #define DEFINE_H
 
+/* ãƒ‡ãƒãƒƒã‚°ç”¨ãƒã‚¯ãƒ­ */
+#define dprintf(s,...) fprintf(stderr, "%s:%d: " s, __FILE__, __LINE__,__VA_ARGS__)
+
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define ADD(a, b) (a + b)
 #define ABS(a) ((a) < 0 ? - (a) : (a))
 
-#define MAX_LEN 256
+#define MAX_LEN 255
+
 #define EMPTY -1
-#define INF -1
 #define SUN_HIGH 25
 #define SUN_LOW 0
 #define SUN_WIDTH 30
 
-#define BUILD_HIGH 5 //Œš•¨‚Ì‚‚³[m]
-#define BUILD_WIDTH 5 //Œš•¨‚Ì•[m]
+#define BUILD_HIGH 5 //å»ºç‰©ã®é«˜ã•[m]
+
+#define EAST2WEST 0
+#define WEST2EAST 1
+#define SOUTH2NORTH 2
+#define NORTH2SOUTH 3
 
 
-#define PRINT_ROUTE 1 //0->Œo˜H‚ğ•\¦‚µ‚È‚¢@1->Œo˜H‚ğ•\¦‚·‚é
-#define PRINT_GLARE_ROUTE 1 //0->á¿‚µ‚³‚ğŠ´‚¶‚½•”•ªŒo˜H‚ğ•\¦‚·‚éD1->•\¦‚·‚é
-#define BUILD_MODE 1 // 0->Œš•¨‚ğl—¶‚µ‚È‚¢@1->Œš•¨‚ğl—¶‚·‚é
-#define MEASURE_PROCESS_TIME_MODE 0 //0->ˆ—ŠÔ‚ğŒv‘ª‚µ‚È‚¢ 1->ˆ—ŠÔ‚ğŒv‘ª‚·‚é
-#define PRINT_GRID_MAP 0 //0->ƒOƒŠƒbƒh’n}‚ğƒtƒ@ƒCƒ‹‘‚«‚İ‚µ‚È‚¢@1¨ƒtƒ@ƒCƒ‹‘‚«‚İ‚·‚é
-#define BUILD_WIDTH_MODE 1 // 0->‘–¸‘ÎÛƒOƒŠƒbƒh‘I’è‚É‚ÄCæ‚èˆµ‚¤‰e•‚ğ’è”‚Åæ‚èˆµ‚¤ 1->Å‘åŒš•¨•‚Åæ‚èˆµ‚¤D
-#define GSZ_EXP 1 //“KØ‚ÈƒOƒŠƒbƒhƒTƒCƒY‚ğ’T‚·¨0@‚»‚¤‚Å‚È‚¢ê‡¨1
+/* çµŒè·¯æ¢ç´¢ã™ã‚‹ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ  */
 
-#define TEST_GRID 1 //1¨ƒOƒŠƒbƒh•ªŠ„‚ÌƒeƒXƒg
+#define WRSTA_STAR 1
+#define NA_STAR 2
+#define MOA_STAR 3
+
+
+#define TIME_EXPAND_TYPE 0
+#define STATIC 0
+#define GLARE 1
+
+#define ALLOC_MAX 0
+#define ALLOC_MIN 1
+#define ALLOC_AVG 2
+#define ALLOC_BOTH 3
+
+/* å®Ÿé¨“ã«ä½¿ã†åœ°å›³ã®ç¨®é¡ */
+#define MAP_TYPE 0
+#define HIROSHIMA 0
+#define SAMPLE1 1
+#define SAMPLE2 2
+#define SAMPLE1000 1000
+#define SAMPLE2000 2000
+#define SAMPLE3000 3000
+#define SAMPLE4000 4000
+#define SAMPLE5000 5000
+#define SAMPLE10000 10000
+
+#define PRINT_EXPENDED_EDGE 1 //æ™‚é–“æ‹¡å¤§ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã®å„è¾ºã‚’å‡ºåŠ›ã™ã‚‹ã‹
+#define PRINT_ROUTE 1 //0->çµŒè·¯ã‚’è¡¨ç¤ºã—ãªã„ã€€1->çµŒè·¯ã‚’è¡¨ç¤ºã™ã‚‹
+#define PRINT_GLARE_ROUTE 1 //0->çœ©ã—ã•ã‚’æ„Ÿã˜ãŸéƒ¨åˆ†çµŒè·¯ã‚’è¡¨ç¤ºã—ãªã„ï¼1->è¡¨ç¤ºã™ã‚‹
+
+#define MONITOR_PRIORITY_LIST 0 //ãƒ—ãƒ©ã‚¤ã‚ªãƒªãƒ†ã‚£ã‚­ãƒ¥ãƒ¼ã‚’ç›£è¦–ã™ã‚‹â†’1ã€€ç›£è¦–ã—ãªã„â†’0
 
 #define TRUE 1
 #define FALSE 0
 
+/* çµŒè·¯æ¢ç´¢å½“è©²æ—¥ */
 #define YEAR 2015
 #define MONTH 6
 #define DAY 21
+
+#define EXTRA_ILLUMI 134000 //å¤ªé™½æ³•ç·šç…§åº¦
+#define ATMOS_TRANS 0.60    //å¤§æ°—é€éç‡
+#define SUN_LENGTH 149597870000 //å¤ªé™½ã¨ã®è·é›¢
+#define BACKGROUND_LUMINANCE 1500
 
 #endif

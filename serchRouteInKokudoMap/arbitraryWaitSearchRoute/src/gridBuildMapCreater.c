@@ -30,6 +30,11 @@ static void setMapEndPos(build_set_t bld_st, xy_coord_t *whle_bgn_pos, xy_coord_
 
 /**
 *各グリッド地図に始端座標(最小xy座標)と終端座標(最大xy座標)を割り当てる．
+*@param グリッド地図の配列
+*@param grd_len 各グリッド地図の東西(x軸)と南北(y軸)方向における長さ
+*@param whle_bgn_pos 全体地図の始端座標
+*@param whle_end_pos 全体地図の終端座標
+*@param grd_sz グリッド地図の東西(x軸)と南北(y軸)方向におけるセルの枚数+1
 */
 void assgnGrdArea(build_grid_t **bld_grd, xy_coord_t grd_len,
   xy_coord_t whle_bgn_pos, xy_coord_t whle_end_pos, grid_size_t grd_sz){
@@ -46,12 +51,15 @@ void assgnGrdArea(build_grid_t **bld_grd, xy_coord_t grd_len,
       bld_grd[i][j].end.x = whle_bgn_pos.x + grd_len.x * j;
       bld_grd[i][j].end.y = whle_bgn_pos.y + grd_len.y * i;
 
-      if(i == grd_sz.sn -1)
+      if(i == grd_sz.sn -1){
         bld_grd[i][j].end.y = whle_end_pos.y * 2;
-      if(j == grd_sz.ew - 1)
+      }
+      if(j == grd_sz.ew - 1){
         bld_grd[i][j].end.x = whle_end_pos.x * 2;
+      }
     }
   }
+
   return;
 }
 
@@ -99,15 +107,21 @@ static void allctBldToGrd(build_set_t bld_st, build_grid_t **bld_grd,
   bld_st.ptr = bld_st.head;
   bld_st.ptr = bld_st.ptr->next;
 
+/* 建物リストを走査していく． */
   while(bld_st.ptr != NULL){
-    indx_sn = (int)(bld_st.ptr->pos.y - (int)bld_grd[1][1].bgn.y) / (int)grd_len.y;
-    indx_ew = (int)(bld_st.ptr->pos.x - (int)bld_grd[1][1].bgn.y) / (int)grd_len.x;
+    indx_sn = (int)((bld_st.ptr->pos.y - bld_grd[1][1].bgn.y) / grd_len.y) + 1;
+    indx_ew = (int)((bld_st.ptr->pos.x - bld_grd[1][1].bgn.x) / grd_len.x) + 1;
     if(indx_sn < 1)
       indx_sn = 1;
     if(indx_ew < 1)
       indx_ew = 1;
 
     bld_grd[indx_sn][indx_ew].ptr = buildMalloc();
+    if(bld_st.ptr->pos.x < bld_grd[indx_sn][indx_ew].bgn.x ||
+      bld_st.ptr->pos.x > bld_grd[indx_sn][indx_ew].end.x ||
+      bld_st.ptr->pos.y < bld_grd[indx_sn][indx_ew].bgn.y ||
+      bld_st.ptr->pos.y > bld_grd[indx_sn][indx_ew].end.y){
+    }
     cpyBld(bld_grd[indx_sn][indx_ew].ptr, bld_st.ptr);
     bld_grd[indx_sn][indx_ew].old->next = bld_grd[indx_sn][indx_ew].ptr;
     bld_grd[indx_sn][indx_ew].old = bld_grd[indx_sn][indx_ew].ptr;
@@ -121,35 +135,33 @@ static void allctBldToGrd(build_set_t bld_st, build_grid_t **bld_grd,
   }
   return;
 }
-
-build_grid_t **cretGrdMap(build_set_t bld_st, xy_coord_t grd_len){
-  xy_coord_t whle_bgn_pos, whle_end_pos;
-  grid_size_t grd_sz;
+/* グリッドマップを生成する． */
+build_grid_t **cretGrdMap(build_set_t bld_st, xy_coord_t grd_len, grid_size_t *grd_cell_sz){
+  xy_coord_t whle_bgn_pos, whle_end_pos; //全体(分割前)地図における始端座標と終端座標
   build_grid_t **bld_grd = NULL;
 
 /* 全体地図の始端(最小xy座標)と終端(最大xy座標)を求める */
   setMapEndPos(bld_st, &whle_bgn_pos, &whle_end_pos);
 /* 南北と東西方向におけるグリッド地図の要素数を求める */
-  grd_sz.sn = (int)(floor((whle_end_pos.y - whle_bgn_pos.y) / grd_len.y) + 2);
-  grd_sz.ew = (int)(floor((whle_end_pos.x - whle_bgn_pos.x) / grd_len.x) + 2);
+  grd_cell_sz->sn = (int)(floor((whle_end_pos.y - whle_bgn_pos.y) / grd_len.y) + 2);
+  grd_cell_sz->ew = (int)(floor((whle_end_pos.x - whle_bgn_pos.x) / grd_len.x) + 2);
 
 /* グリッド地図の枚数分の記憶領域を取得する */
-  //bld_grd = (build_grid_t *)malloc(sizeof(build_grid_t) * grd_sz.sn);
-  bld_grd = (build_grid_t **)malloc(sizeof(build_grid_t) * grd_sz.sn);
+  bld_grd = (build_grid_t **)malloc(sizeof(build_grid_t) * grd_cell_sz->sn);
   if(NULL == bld_grd){
     fprintf(stderr, "bld_grd memory allocation failed\n");
     exit(1);
   }
   int i;
-  for(i=0;i<grd_sz.sn;i++){
-    bld_grd[i] = (build_grid_t *)malloc(sizeof(build_grid_t) * grd_sz.ew);
+  for(i=0;i<grd_cell_sz->sn;i++){
+    bld_grd[i] = (build_grid_t *)malloc(sizeof(build_grid_t) * grd_cell_sz->ew);
     if(NULL == bld_grd[i]){
       fprintf(stderr, "bld_grid[%d] memory allocation failed\n", i);
     }
   }
 
-  assgnGrdArea(bld_grd, grd_len, whle_bgn_pos, whle_end_pos, grd_sz);
-  allctBldToGrd(bld_st, bld_grd, grd_sz, grd_len);
+  assgnGrdArea(bld_grd, grd_len, whle_bgn_pos, whle_end_pos, *grd_cell_sz);
+  allctBldToGrd(bld_st, bld_grd, *grd_cell_sz, grd_len);
 
   return bld_grd;
 }

@@ -5,7 +5,7 @@
 #include "header.h"
 #include "define.h"
 
-static void dtctFileOpn(FILE **fp, char *fname, char *mode){
+void dtctFileOpn(FILE **fp, char *fname, char *mode){
   if((*fp = fopen(fname, mode)) == NULL){
     fprintf(stderr, "%s is failed open\n", fname);
     exit(1);
@@ -13,7 +13,7 @@ static void dtctFileOpn(FILE **fp, char *fname, char *mode){
   return;
 }
 
-/* ‘S‚Ä‚Ì’¸“_iŒð·“_j‚ðŠi”[‚·‚éˆ×‚É•K—v‚Æ‚È‚é—v‘fƒTƒCƒY‚ðinputfile‚©‚ç“Ç‚Ýž‚Þ */
+/* å…¨ã¦ã®é ‚ç‚¹ï¼ˆäº¤å·®ç‚¹ï¼‰ã‚’æ ¼ç´ã™ã‚‹ç‚ºã«å¿…è¦ã¨ãªã‚‹è¦ç´ ã‚µã‚¤ã‚ºã‚’inputfileã‹ã‚‰èª­ã¿è¾¼ã‚€ */
 static int loadVrtxSz(char *VrtxFile){
   FILE *fp;
   char buf[256];
@@ -43,8 +43,8 @@ static void loadVrtxPos(char *VrtxFile, vertex_t *vrtx){
   return;
 }
 
-/* —×ÚƒŠƒXƒg‚Ì‹L‰¯—Ìˆæ‚ÌŽæ“¾ */
-struct adj_list_t *adjListMalloc(void){
+/* éš£æŽ¥ãƒªã‚¹ãƒˆã®è¨˜æ†¶é ˜åŸŸã®å–å¾— */
+adj_list_t *adjListMalloc(void){
 	return (adj_list_t *)malloc(sizeof(adj_list_t));
 }
 
@@ -99,25 +99,26 @@ void loadEdgeList(char *EdgeFile, vertex_t *vrtx, int vrtx_sz){
   return;
 }
 
-/* build_pos_tŒ^•ª‚Ìƒƒ‚ƒŠ‚ðŠm•Û‚µCstruct build_pos_t*@‚ÖƒLƒƒƒXƒg‚·‚é */
+/* build_pos_tåž‹åˆ†ã®ãƒ¡ãƒ¢ãƒªã‚’ç¢ºä¿ã—ï¼Œstruct build_pos_t*ã€€ã¸ã‚­ãƒ£ã‚¹ãƒˆã™ã‚‹ */
 build_pos_t *buildMalloc(void){
   return (build_pos_t *)malloc(sizeof(build_pos_t));
 }
 
-/* 2“_ŠÔ‚ÌÀ•W‚ðŒvŽZ‚·‚é */
+/* 2ç‚¹é–“ã®åº§æ¨™ã‚’è¨ˆç®—ã™ã‚‹ */
 static double getDist(xy_coord_t orgn, xy_coord_t dst){
 	return sqrt((dst.x - orgn.x) * (dst.x - orgn.x) + (dst.y - orgn.y) * (dst.y - orgn.y));
 }
 
 /**
-Œš•¨ƒf[ƒ^ƒtƒ@ƒCƒ‹‚ð“Ç‚Ýž‚ÝC–{ƒVƒXƒeƒ€‚Ìƒf[ƒ^Œ`Ž®‚É•ÏŠ·‚·‚éD
-Ú×‚ÍˆÈ‰º‚Ì’Ê‚èF
-‚Ü‚¸Cƒtƒ@ƒCƒ‹‚©‚çŒš•¨‚Ìõˆø”Ô†‚ÆÅ‘å‚¨‚æ‚ÑÅ¬ˆÊ’uÀ•W‚ð“Ç‚Ýž‚ÞD
-ŽŸ‚ÉC“Ç‚Ýž‚ñ‚¾ˆÊ’uÀ•W‚ÉŠî‚Ã‚«CŒš•¨‚Ì’†SÀ•W‚ð‹‚ß‚éD
-‚±‚ê‚ç‚Ì‘€ì‚ð‘S‚Ä‚ÌŒš•¨‚É‘Î‚µ“K—p‚·‚éŽ–‚ÅC
-Œš•¨‚Ìƒf[ƒ^ƒZƒbƒg‚ðì¬‚·‚éD
+å»ºç‰©ãƒ‡ãƒ¼ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã¿ï¼Œæœ¬ã‚·ã‚¹ãƒ†ãƒ ã®ãƒ‡ãƒ¼ã‚¿å½¢å¼ã«å¤‰æ›ã™ã‚‹ï¼Ž
+è©³ç´°ã¯ä»¥ä¸‹ã®é€šã‚Šï¼š
+ã¾ãšï¼Œãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰å»ºç‰©ã®ç´¢å¼•ç•ªå·ã¨æœ€å¤§ãŠã‚ˆã³æœ€å°ä½ç½®åº§æ¨™ã‚’èª­ã¿è¾¼ã‚€ï¼Ž
+æ¬¡ã«ï¼Œèª­ã¿è¾¼ã‚“ã ä½ç½®åº§æ¨™ã«åŸºã¥ãï¼Œå»ºç‰©ã®ä¸­å¿ƒåº§æ¨™ã‚’æ±‚ã‚ã‚‹ï¼Ž
+ã“ã‚Œã‚‰ã®æ“ä½œã‚’å…¨ã¦ã®å»ºç‰©ã«å¯¾ã—é©ç”¨ã™ã‚‹äº‹ã§ï¼Œ
+å»ºç‰©ã®ãƒ‡ãƒ¼ã‚¿ã‚»ãƒƒãƒˆã‚’ä½œæˆã™ã‚‹ï¼Ž
  */
-void loadBldPos(char *BuildFile, build_set_t *bld_st){
+ void loadBldPos(char *BuildFile, build_set_t *bld_st){
+  max_bld_wdth = 0.0f;
   FILE *fp;
   dtctFileOpn(&fp, BuildFile, "r");
   xy_coord_t min_pos, max_pos;
@@ -125,32 +126,80 @@ void loadBldPos(char *BuildFile, build_set_t *bld_st){
   bld_st->head = buildMalloc();
   bld_st->old = bld_st->head;
 
+/* å»ºç‰©ãƒ•ã‚¡ã‚¤ãƒ«ã®å„ãƒˆãƒ¼ã‚¯ãƒ³ã‚’èª­ã¿è¾¼ã‚“ã§ã„ãï¼Ž */
   while(bld_st->ptr = buildMalloc(), fscanf(fp, "%d", &bld_st->ptr->num) != EOF){
     fscanf(fp, "%lf %lf %lf %lf", &min_pos.x, &min_pos.y, &max_pos.x, &max_pos.y);
-    bld_st->ptr->pos.x = (min_pos.x + max_pos.x) / 2;
-    bld_st->ptr->pos.y = (min_pos.y + max_pos.y) / 2;
-    bld_st->ptr->wdth = getDist(min_pos, max_pos);
-
+    /* å»ºç‰©ã®ä¸­å¿ƒåº§æ¨™ï¼ŒåŠå¾„ï¼Œå»ºç‰©ã®æœ€å¤§ã®åŠå¾„ã‚’ç®—å‡ºã™ã‚‹ï¼Ž */
+    bld_st->ptr->pos.x = (min_pos.x + max_pos.x) / 2.0f;
+    bld_st->ptr->pos.y = (min_pos.y + max_pos.y) / 2.0f;
+    bld_st->ptr->wdth = getDist(min_pos, max_pos) / 2.0f;
+    bld_st->ptr->wdth = bld_st->ptr->wdth / 10.0f;
+    max_bld_wdth = MAX(max_bld_wdth, bld_st->ptr->wdth);
+    /* å»ºç‰©ãƒªã‚¹ãƒˆã®æœ«å°¾ã«è¦ç´ ã‚’è¿½åŠ ã™ã‚‹ï¼Ž */
     bld_st->old->next = bld_st->ptr;
     bld_st->old = bld_st->ptr;
     bld_st->sz++;
   }
   bld_st->old->next = NULL;
-  fprintf(stdout, "build_num = %d\n", bld_st->sz);
+
   fclose(fp);
 }
 
 void setInptFilesData(vertex_set_t *vrtx_st, build_set_t* bld_st){
-  
-  char *VrtxFile = "../inputfile/node_position.txt";
-  char *EdgeFile = "../inputfile/edge_list.txt";
-  char *BuildFile = "../inputfile/building_position.txt";
+  char *VrtxFile;
+  char *EdgeFile;
+  char *BuildFile;
 
-/*
-  char *VrtxFile = "../test_inputfile/sample1/node_position.txt";
-  char *EdgeFile = "../test_inputfile/sample1/edge_list.txt";
-  char *BuildFile = "../test_inputfile/sample1/building_position.txt";
-*/
+  if(HIROSHIMA == map_type){
+    VrtxFile = "../inputfile/node_position.txt";
+    EdgeFile = "../inputfile/edge_list.txt";
+    BuildFile = "../inputfile/building_position.txt";
+  }
+  else if(SAMPLE1 == map_type){
+    VrtxFile = "../test_inputfile/sample1/node_position.txt";
+    EdgeFile = "../test_inputfile/sample1/edge_list.txt";
+    BuildFile = "../test_inputfile/sample1/building_position.txt";
+  }
+  else if(SAMPLE2 == map_type){
+    VrtxFile = "../test_inputfile/sample2/node_position.txt";
+    EdgeFile = "../test_inputfile/sample2/edge_list.txt";
+    BuildFile = "../test_inputfile/sample2/building_position.txt";
+  }
+  else if(SAMPLE1000 == map_type){
+    VrtxFile = "../test_inputfile/sample1000/node_position.txt";
+    EdgeFile = "../test_inputfile/sample1000/edge_list.txt";
+    BuildFile = "../test_inputfile/sample1000/building_position.txt";
+  }
+  else if(SAMPLE2000 == map_type){
+    VrtxFile = "../test_inputfile/sample2000/node_position.txt";
+    EdgeFile = "../test_inputfile/sample2000/edge_list.txt";
+    BuildFile = "../test_inputfile/sample2000/building_position.txt";
+  }
+  else if(SAMPLE3000 == map_type){
+    VrtxFile = "../test_inputfile/sample3000/node_position.txt";
+    EdgeFile = "../test_inputfile/sample3000/edge_list.txt";
+    BuildFile = "../test_inputfile/sample3000/building_position.txt";
+  }
+  else if(SAMPLE4000 == map_type){
+    VrtxFile = "../test_inputfile/sample4000/node_position.txt";
+    EdgeFile = "../test_inputfile/sample4000/edge_list.txt";
+    BuildFile = "../test_inputfile/sample4000/building_position.txt";
+  }
+  else if(SAMPLE5000 == map_type){
+    VrtxFile = "../test_inputfile/sample5000/node_position.txt";
+    EdgeFile = "../test_inputfile/sample5000/edge_list.txt";
+    BuildFile = "../test_inputfile/sample5000/building_position.txt";
+  }
+  else if(SAMPLE10000 == map_type){
+    VrtxFile = "../test_inputfile/sample10000/node_position.txt";
+    EdgeFile = "../test_inputfile/sample10000/edge_list.txt";
+    BuildFile = "../test_inputfile/sample10000/building_position.txt";
+  }
+  else{
+    fprintf(stderr, "You may be wrong value of parameter map type\n");
+    exit(1);
+  }
+
   vrtx_st->sz = loadVrtxSz(VrtxFile);
 
   vrtx_st->indx = (vertex_t *)malloc(sizeof(vertex_t) * vrtx_st->sz);

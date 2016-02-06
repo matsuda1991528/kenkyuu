@@ -68,7 +68,7 @@ void setInptData(int argc, char **argv, input_t* inpt){
 			inpt->lambda = atof(*++argv);
 		}
 		else if(strcmp(*argv, "-mode")==0){
-			inpt->rt_mode = atoi(*++argv);
+			map_type = atoi(*++argv);
     }
     else if(strcmp(*argv, "-tim_intrvl") == 0){
       intrvl_sec = atoi(*++argv);
@@ -129,8 +129,6 @@ int main(int argc, char **argv) {
   initInptData(&inpt);
   setInptData(argc, argv, &inpt);
   lmbd = inpt.lambda;
-  //find_path_algrthm = DIJKSTRA;
-  //find_path_algrthm = A_STAR;
 
 /* 入力ファイルから交差点データセットと建物データセットを読み込む */
   vertex_set_t vrtx_st;
@@ -141,7 +139,6 @@ int main(int argc, char **argv) {
   int direction_instance = dtctDirectionInstance(vrtx_st.indx[inpt.dptr_vrtx].pos,
   vrtx_st.indx[inpt.arrv_vrtx].pos);
   createCostOutputFile(direction_instance, inpt.dptr_tim);
-
 
 /* グリッド地図を生成する */
   grid_size_t grd_cell_sz;
@@ -154,8 +151,6 @@ int main(int argc, char **argv) {
     cretTimExpdNtwk(vrtx_st, bld_grd, inpt.grd_len, grd_cell_sz, inpt.kph);
   else
     cretSttcTimExpdNtwk(vrtx_st, bld_grd, inpt.grd_len, grd_cell_sz, inpt.kph);
-  fprintf(stdout, "finish\n");
-  //exit(1);
 
   /* 経路を探索する */
   srchRoute(vrtx_st, inpt.dptr_vrtx, inpt.arrv_vrtx, inpt.dptr_tim,
