@@ -244,11 +244,13 @@ static void printAllEdge(vertex_t *vrtx, int vrtx_sz){
       while(NULL != tmp_vrtx.ptr->t_ptr){
         fprintf(fp, "bgn %2d:%2d\t", tmp_vrtx.ptr->t_ptr->bgn_tim.hour, tmp_vrtx.ptr->t_ptr->bgn_tim.min);
         fprintf(fp, "end %2d:%2d\t", tmp_vrtx.ptr->t_ptr->end_tim.hour, tmp_vrtx.ptr->t_ptr->end_tim.min);
-        fprintf(fp, "upper cost:%.12f\t lower cost:%.12f\n",
-        tmp_vrtx.ptr->t_ptr->high_cost, tmp_vrtx.ptr->t_ptr->low_cost);
+        fprintf(fp, "upper cost:%.12f\t lower cost:%.12f\t lowr tim %2d:%2d\n",
+        tmp_vrtx.ptr->t_ptr->high_cost, tmp_vrtx.ptr->t_ptr->low_cost,
+        tmp_vrtx.ptr->t_ptr->arch_low_cost_tim.hour, tmp_vrtx.ptr->t_ptr->arch_low_cost_tim.min);
         if(tmp_vrtx.ptr->t_ptr->high_cost < tmp_vrtx.ptr->t_ptr->low_cost)
-          fprintf(stderr, "upper %f lower %f\n", tmp_vrtx.ptr->t_ptr->high_cost,
-          tmp_vrtx.ptr->t_ptr->low_cost);
+          fprintf(stderr, "upper %f lower %f\t lowr tim:%2d:%2d\n", tmp_vrtx.ptr->t_ptr->high_cost,
+          tmp_vrtx.ptr->t_ptr->low_cost, tmp_vrtx.ptr->t_ptr->arch_low_cost_tim.hour,
+          tmp_vrtx.ptr->t_ptr->arch_low_cost_tim.min);
 
         tmp_vrtx.ptr->t_ptr = tmp_vrtx.ptr->t_ptr->next;
       }
@@ -323,6 +325,7 @@ void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
               lowr_cost = uppr_cost = edge_trvt;
               vrtx_st.indx[i].ptr->t_ptr->low_cost = edge_trvt;
               vrtx_st.indx[i].ptr->t_ptr->high_cost = edge_trvt;
+              cpyTim(tim, &vrtx_st.indx[i].ptr->t_ptr->arch_low_cost_tim);
 
               //initTimSpceCost(vrtx_st.indx[i].ptr);
             }
@@ -342,7 +345,7 @@ void cretTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
             else if(curr_glr_stat){
               vrtx_st.indx[i].ptr->t_ptr->low_cost = lowr_cost;
               vrtx_st.indx[i].ptr->t_ptr->high_cost = uppr_cost;
-              cpyTim(tim, &vrtx_st.indx[i].ptr->t_ptr->arch_low_cost_tim);
+              cpyTim(lowr_cost_tim, &vrtx_st.indx[i].ptr->t_ptr->arch_low_cost_tim);
             }
             bfre_glr_stat = curr_glr_stat;
             if(sun.elev < 0.0f){
@@ -410,7 +413,8 @@ void cretSttcTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
       tmp_cost = edge_trvt = getEdgeTrvSec(kph, orgn_pos, dst_pos);
       vrtx_st.indx[i].ptr->edge_trvt = edge_trvt;
       vrtx_st.indx[i].ptr->t_ptr->high_cost = vrtx_st.indx[i].ptr->t_ptr->low_cost = edge_trvt;
-      lowr_cost = uppr_cost = edge_trvt;
+      uppr_cost = edge_trvt;
+      lowr_cost = EMPTY;
 
       edge_deg = getDegBtwn2pos(orgn_pos, dst_pos);
       if((0.0f < edge_deg && edge_deg < 110.0f) || 220.0f < edge_deg)
@@ -425,6 +429,7 @@ void cretSttcTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
           sun = getSunAngle(tim_h);
           /* 時刻timにおける西日グレアの発生の有無を計算する */
           curr_glr_stat = fndGlrOccred(sun, orgn_pos, dst_pos, bld_grd, grd_len, grd_cell_sz);
+
           if(curr_glr_stat){ //グレアが発生するならば
             tmp_cost = getGlrVal(sun, orgn_pos, dst_pos) * edge_trvt;
           }else{
@@ -432,22 +437,30 @@ void cretSttcTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
           }
           allocEdgeCost(&uppr_cost, &lowr_cost, tmp_cost, &lowr_cost_tim, tim);
 
-          /* 時間拡大辺の始端時刻から時間間隔分経過したならば， */
-          /* 終端時刻の格納と，時間空間リストを末尾に追加する． */
-          /* この時，切り替わった原因が日没ならば，時刻に対する繰り返しを終了する */
           if(intrvl_sec != 60.0f){
+            /* 時間拡大辺の始端時刻から時間間隔分経過した場合 */
             if(elapsedTimIntrvl(vrtx_st.indx[i].ptr->t_ptr->bgn_tim, tim, intrvl_sec)){
+              /* 終端時刻の格納と，時間空間リストを末尾に追加する． */
               setTimSpceEndTim(vrtx_st.indx[i].ptr, tim);
+              /* 連結リストを挿入する */
               appndTimSpceLst(vrtx_st.indx[i].ptr);
+              /* 新たに連結したリストへ現在時刻を格納する． */
               setTimSpceBgnTim(vrtx_st.indx[i].ptr, tim);
+              /* 下限値，上限値，下限値を記録した時刻の初期化を行う． */
+              uppr_cost = lowr_cost = EMPTY;
+              allocEdgeCost(&uppr_cost, &lowr_cost, tmp_cost, &lowr_cost_tim, tim);
               vrtx_st.indx[i].ptr->t_ptr->low_cost = lowr_cost;
               vrtx_st.indx[i].ptr->t_ptr->high_cost = uppr_cost;
               cpyTim(tim, &vrtx_st.indx[i].ptr->t_ptr->arch_low_cost_tim);
-              uppr_cost = edge_trvt;
-              lowr_cost = EMPTY;
+            }
+            /* 時間拡大辺の始端時刻から時間間隔分経過していない場合 */
+            else{
+                vrtx_st.indx[i].ptr->t_ptr->low_cost = lowr_cost;
+                vrtx_st.indx[i].ptr->t_ptr->high_cost = uppr_cost;
+                cpyTim(lowr_cost_tim, &vrtx_st.indx[i].ptr->t_ptr->arch_low_cost_tim);
             }
           }
-          else{
+          else if(intrvl_sec == 60.0f){
             if((bfre_glr_stat) || (curr_glr_stat)){
               setTimSpceEndTim(vrtx_st.indx[i].ptr, tim);
               appndTimSpceLst(vrtx_st.indx[i].ptr);
@@ -460,6 +473,7 @@ void cretSttcTimExpdNtwk(vertex_set_t vrtx_st, build_grid_t** bld_grd,
             }
           }
           bfre_glr_stat = curr_glr_stat;
+          /* 日没ならば，時刻に対する繰り返しを終了する */
           if(sun.elev < 0.0f){
            goto END2;
           }
