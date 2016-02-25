@@ -138,6 +138,9 @@ int main(int argc, char **argv) {
  /* 出発地と帰着地点の方角におけるインスタンス種類を識別する */
   int direction_instance = dtctDirectionInstance(vrtx_st.indx[inpt.dptr_vrtx].pos,
   vrtx_st.indx[inpt.arrv_vrtx].pos);
+  // if(EAST2WEST != direction_instance)
+  //   exit(1);
+
   createCostOutputFile(direction_instance, inpt.dptr_tim);
 
 /* グリッド地図を生成する */

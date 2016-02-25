@@ -8,10 +8,10 @@ import random
 import datetime
 import locale
 
-start_list = [1]
-goal_list = [100]
+start_list = [17298]
+goal_list = [3738]
 
-start_hour_list = [17]
+start_hour_list = [18]
 start_min_list = [0]
 
 interval_sec_list = [-1]
@@ -21,26 +21,26 @@ mode_list = [1, 2, 3]
 edc = 3
 
 
-#for start in start_list:
-	#for goal in goal_list:
+# for start in start_list:
+# 	for goal in goal_list:
 while 1:
 	d = datetime.datetime.today()
-	print d.strftime("%Y-%m-%d %H:%M:%S"), '\n'
+	print d.strftime("%Y-%m-%d %H:%M:%S")
 
 	while 1:
 		start = random.randint(1, 20000)
 		goal = random.randint(1, 20000)
+		# start = 17060
+		# goal = 10433
 		if(start != goal):
-			print "%d -> %d" % (start, goal)
 			break
-
+	print "******************"
+	print "%d -> %d" % (start, goal)
 	for hour in start_hour_list:
 		for min in start_min_list:
 			for interval in interval_sec_list:
 				for lam in lam_list:
 					for mode in mode_list:
-						#print "******************"
-						#print "start %s goal %s dpt_h %s dpt_m %s" % (start, goal, hour, min)
 						cmd = "./go -start %s -goal %s -dptr_h %s -dptr_m %s -kph 30 -gx 50 -gy 50 -lam %s -mode 0 -tim_intrvl %s -alg %s -edc %s" % (start, goal, hour, min, lam, interval, mode, edc)
 						subprocess.call( cmd.strip().split(" ")  )
 

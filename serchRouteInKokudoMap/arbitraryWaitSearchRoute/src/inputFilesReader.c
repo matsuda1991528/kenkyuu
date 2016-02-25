@@ -133,7 +133,7 @@ static double getDist(xy_coord_t orgn, xy_coord_t dst){
     bld_st->ptr->pos.x = (min_pos.x + max_pos.x) / 2.0f;
     bld_st->ptr->pos.y = (min_pos.y + max_pos.y) / 2.0f;
     bld_st->ptr->wdth = getDist(min_pos, max_pos) / 2.0f;
-    bld_st->ptr->wdth = bld_st->ptr->wdth / 10.0f;
+    bld_st->ptr->wdth = bld_st->ptr->wdth / 2.0f;
     max_bld_wdth = MAX(max_bld_wdth, bld_st->ptr->wdth);
     /* 建物リストの末尾に要素を追加する． */
     bld_st->old->next = bld_st->ptr;

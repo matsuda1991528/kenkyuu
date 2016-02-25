@@ -66,6 +66,7 @@
 #define MONTH 6
 #define DAY 21
 
+//#define EXTRA_ILLUMI 70000 //太陽法線照度
 #define EXTRA_ILLUMI 134000 //太陽法線照度
 #define ATMOS_TRANS 0.60    //大気透過率
 #define SUN_LENGTH 149597870000 //太陽との距離
